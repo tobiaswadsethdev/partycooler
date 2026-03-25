@@ -1,0 +1,210 @@
+'use client'
+
+import { useState } from 'react'
+import { format } from 'date-fns'
+import { ArrowDownToLine, ArrowUpFromLine, Search, ChevronDown } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
+  Empty,
+  EmptyMedia,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+} from '@/components/ui/empty'
+import { cn } from '@/lib/utils'
+import type { InventoryTransaction } from '@/lib/types'
+
+interface TransactionHistoryProps {
+  transactions: InventoryTransaction[]
+}
+
+const PAGE_SIZE = 20
+
+export function TransactionHistory({ transactions }: TransactionHistoryProps) {
+  const [search, setSearch] = useState('')
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+
+  const filtered = transactions.filter((t) => {
+    const productName = t.product?.name ?? ''
+    const category = t.product?.category ?? ''
+    const notes = t.notes ?? ''
+    const q = search.toLowerCase()
+    return (
+      productName.toLowerCase().includes(q) ||
+      category.toLowerCase().includes(q) ||
+      notes.toLowerCase().includes(q)
+    )
+  })
+
+  if (transactions.length === 0) {
+    return (
+      <Empty className="border">
+        <EmptyMedia variant="icon">
+          <ArrowDownToLine />
+        </EmptyMedia>
+        <EmptyHeader>
+          <EmptyTitle>No transactions yet</EmptyTitle>
+          <EmptyDescription>
+            Record your first stock movement using the form above.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    )
+  }
+
+  const visible = filtered.slice(0, visibleCount)
+  const hasMore = filtered.length > visibleCount
+
+  return (
+    <div className="space-y-4">
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Search transactions..."
+          aria-label="Search transactions"
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setVisibleCount(PAGE_SIZE) }}
+          className="pl-9"
+        />
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden sm:block rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-8" />
+              <TableHead>Product</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead className="text-right">Quantity</TableHead>
+              <TableHead>Notes</TableHead>
+              <TableHead className="text-right">Date</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                  No transactions match your search.
+                </TableCell>
+              </TableRow>
+            ) : (
+              visible.map((t) => (
+                <TableRow key={t.id}>
+                  <TableCell>
+                    {t.transaction_type === 'ingress' ? (
+                      <ArrowDownToLine className="h-4 w-4 text-[var(--success)]" />
+                    ) : (
+                      <ArrowUpFromLine className="h-4 w-4 text-destructive" />
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div>
+                      <p className="font-medium">{t.product?.name ?? '—'}</p>
+                      {t.product?.category && (
+                        <p className="text-xs text-muted-foreground">{t.product.category}</p>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        t.transaction_type === 'ingress'
+                          ? 'bg-[var(--success)]/10 text-[var(--success)]'
+                          : 'bg-destructive/10 text-destructive'
+                      )}
+                    >
+                      {t.transaction_type === 'ingress' ? 'Stock in' : 'Stock out'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums font-medium">
+                    {t.transaction_type === 'ingress' ? '+' : '-'}{t.quantity}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground max-w-xs truncate">
+                    {t.notes ?? '—'}
+                  </TableCell>
+                  <TableCell className="text-right text-sm text-muted-foreground tabular-nums">
+                    {format(new Date(t.transaction_date), 'MMM d, HH:mm')}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Mobile card list */}
+      <div className="sm:hidden space-y-2">
+        {filtered.length === 0 ? (
+          <p className="text-center text-muted-foreground py-8">
+            No transactions match your search.
+          </p>
+        ) : (
+          visible.map((t) => (
+            <div key={t.id} className="flex items-start gap-3 rounded-md border bg-card p-4">
+              <div
+                className={cn(
+                  'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
+                  t.transaction_type === 'ingress'
+                    ? 'bg-[var(--success)]/10 text-[var(--success)]'
+                    : 'bg-destructive/10 text-destructive'
+                )}
+              >
+                {t.transaction_type === 'ingress' ? (
+                  <ArrowDownToLine className="h-4 w-4" />
+                ) : (
+                  <ArrowUpFromLine className="h-4 w-4" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-medium truncate">{t.product?.name ?? '—'}</p>
+                  <span
+                    className={cn(
+                      'shrink-0 text-sm font-semibold tabular-nums',
+                      t.transaction_type === 'ingress'
+                        ? 'text-[var(--success)]'
+                        : 'text-destructive'
+                    )}
+                  >
+                    {t.transaction_type === 'ingress' ? '+' : '-'}{t.quantity}
+                  </span>
+                </div>
+                {t.notes && (
+                  <p className="text-sm text-muted-foreground truncate">{t.notes}</p>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">
+                  {format(new Date(t.transaction_date), 'MMM d, yyyy HH:mm')}
+                </p>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {hasMore && (
+        <div className="flex justify-center">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+          >
+            <ChevronDown className="h-4 w-4 mr-1.5" />
+            Show more ({filtered.length - visibleCount} remaining)
+          </Button>
+        </div>
+      )}
+    </div>
+  )
+}

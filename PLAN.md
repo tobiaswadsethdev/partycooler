@@ -21,16 +21,16 @@ A responsive web application for real-time inventory management of drinks and pr
 
 **Goal:** Set up Supabase integration and basic authentication flow
 
-- [ ] **1.1** Request Supabase integration and configure environment variables
-- [ ] **1.2** Set up Supabase client/server utilities (`lib/supabase/`)
-- [ ] **1.3** Create middleware for session protection
-- [ ] **1.4** Run `scripts/001_create_profiles.sql` - Create profiles table with RLS
-- [ ] **1.5** Build authentication pages:
+- [x] **1.1** Request Supabase integration and configure environment variables
+- [x] **1.2** Set up Supabase client/server utilities (`lib/supabase/`)
+- [x] **1.3** Create route protection (`proxy.ts` — Next.js 16 uses `proxy` convention, not `middleware`)
+- [x] **1.4** Run `scripts/001_create_profiles.sql` - Create profiles table with RLS
+- [x] **1.5** Build authentication pages:
   - `/auth/login/page.tsx`
   - `/auth/sign-up/page.tsx`
   - `/auth/sign-up-success/page.tsx`
   - `/auth/error/page.tsx`
-- [ ] **1.6** Create protected layout with sidebar navigation
+- [x] **1.6** Create protected layout with sidebar navigation (uses shadcn `SidebarProvider`)
 
 **SQL Script - 001_create_profiles.sql:**
 ```sql
@@ -71,15 +71,16 @@ FOR EACH ROW EXECUTE FUNCTION handle_new_user();
 
 **Goal:** Full CRUD operations for product catalog
 
-- [ ] **2.1** Run `scripts/002_create_products.sql` - Create products table
-- [ ] **2.2** Create TypeScript types (`lib/types/index.ts`)
-- [ ] **2.3** Build components:
+- [x] **2.1** Run `scripts/002_create_products.sql` - Create products table
+- [x] **2.2** Create TypeScript types (`lib/types/index.ts`)
+- [x] **2.3** Build components:
   - `components/products/ProductsList.tsx` - Table with sorting/filtering
   - `components/products/AddProductModal.tsx` - Create product form
   - `components/products/EditProductModal.tsx` - Edit product form
   - `components/products/DeleteProductButton.tsx` - Delete with confirmation
-- [ ] **2.4** Create products page: `/protected/products/page.tsx`
-- [ ] **2.5** Implement Server Actions for product CRUD
+  - `components/products/ProductForm.tsx` - Shared form (used by Add and Edit modals)
+- [x] **2.4** Create products page: `/protected/products/page.tsx`
+- [x] **2.5** Implement Server Actions for product CRUD (`lib/actions/products.ts`)
 
 **SQL Script - 002_create_products.sql:**
 ```sql
@@ -113,14 +114,14 @@ CREATE POLICY "products_delete_own" ON products FOR DELETE USING (auth.uid() = u
 
 **Goal:** Record and track stock movements (ingress/egress)
 
-- [ ] **3.1** Run `scripts/003_create_inventory_transactions.sql`
-- [ ] **3.2** Run `scripts/004_create_inventory_status.sql` (with trigger)
-- [ ] **3.3** Build components:
+- [x] **3.1** Run `scripts/003_create_inventory_transactions.sql`
+- [x] **3.2** Run `scripts/004_create_inventory_status.sql` (with trigger)
+- [x] **3.3** Build components:
   - `components/inventory/TransactionForm.tsx` - Record transactions
   - `components/inventory/TransactionHistory.tsx` - History table
   - `components/inventory/QuickActionsPanel.tsx` - Quick stock shortcuts
-- [ ] **3.4** Create inventory page: `/protected/inventory/page.tsx`
-- [ ] **3.5** Implement Server Actions for transactions
+- [x] **3.4** Create inventory page: `/protected/inventory/page.tsx`
+- [x] **3.5** Implement Server Actions for transactions (`lib/actions/transactions.ts`)
 
 **SQL Script - 003_create_inventory_transactions.sql:**
 ```sql
@@ -200,15 +201,15 @@ FOR EACH ROW EXECUTE FUNCTION update_inventory_status();
 
 **Goal:** Create main dashboard with charts and statistics
 
-- [ ] **4.1** Build dashboard components:
-  - `components/dashboard/InventorySummaryCards.tsx` - KPI cards
-  - `components/dashboard/InventoryStatusChart.tsx` - Bar chart (Recharts)
-  - `components/dashboard/TransactionTrendChart.tsx` - Line chart
-  - `components/dashboard/QuickStatsPanel.tsx` - Summary stats
-  - `components/dashboard/AlertBanner.tsx` - Low stock warning
-- [ ] **4.2** Create dashboard page: `/protected/dashboard/page.tsx`
-- [ ] **4.3** Implement data fetching with aggregations
-- [ ] **4.4** Add responsive chart layouts for mobile
+- [x] **4.1** Build dashboard components:
+  - `components/dashboard/InventorySummaryCards.tsx` - KPI cards (4-up grid)
+  - `components/dashboard/InventoryStatusChart.tsx` - Horizontal bar chart; bars turn red at/below reorder threshold
+  - `components/dashboard/TransactionTrendChart.tsx` - Dual area chart (ingress green / egress red), 14 days
+  - `components/dashboard/AlertBanner.tsx` - Low stock warning banner with link to alerts page
+  - Note: `QuickStatsPanel` was not built separately — stats are embedded in `InventorySummaryCards`
+- [x] **4.2** Create dashboard page: `/protected/dashboard/page.tsx`
+- [x] **4.3** Implement data fetching with aggregations (`lib/actions/dashboard.ts`)
+- [x] **4.4** Responsive chart layouts — side-by-side on desktop, stacked on mobile
 
 ---
 
@@ -216,13 +217,13 @@ FOR EACH ROW EXECUTE FUNCTION update_inventory_status();
 
 **Goal:** Automated low stock alerts and management
 
-- [ ] **5.1** Run `scripts/005_create_alerts.sql` (with trigger)
-- [ ] **5.2** Build components:
-  - `components/alerts/AlertsList.tsx` - Alerts table/cards
-  - `components/alerts/AlertItem.tsx` - Individual alert card
-- [ ] **5.3** Create alerts page: `/protected/alerts/page.tsx`
-- [ ] **5.4** Add mark-as-resolved functionality
-- [ ] **5.5** Integrate AlertBanner into dashboard
+- [x] **5.1** Run `scripts/005_create_alerts.sql` (with trigger)
+- [x] **5.2** Build components:
+  - `components/alerts/AlertsList.tsx` - Tabbed active/resolved lists with "Resolve all" button
+  - `components/alerts/AlertItem.tsx` - Individual alert card with resolve + delete actions
+- [x] **5.3** Create alerts page: `/protected/alerts/page.tsx`
+- [x] **5.4** Add mark-as-resolved functionality (per-alert and bulk resolve-all)
+- [x] **5.5** AlertBanner already integrated into dashboard in Phase 4
 
 **SQL Script - 005_create_alerts.sql:**
 ```sql
@@ -280,13 +281,13 @@ FOR EACH ROW EXECUTE FUNCTION create_low_stock_alert();
 
 **Goal:** Historical reporting and activity logs
 
-- [ ] **6.1** Run `scripts/006_create_activity_logs.sql`
-- [ ] **6.2** Build components:
-  - `components/activity/ActivitySummaryCards.tsx` - Daily/weekly/monthly
-  - `components/activity/ActivityChart.tsx` - Trend visualization
-  - `components/activity/ActivityLog.tsx` - History table
-- [ ] **6.3** Create activity page: `/protected/activity/page.tsx`
-- [ ] **6.4** Implement aggregation queries for summaries
+- [x] **6.1** Run `scripts/006_create_activity_logs.sql` (includes trigger to auto-log every inventory transaction)
+- [x] **6.2** Build components:
+  - `components/activity/ActivitySummaryCards.tsx` - Daily/weekly/monthly stat cards (ingress, egress, net, count)
+  - `components/activity/ActivityChart.tsx` - Grouped bar chart (30-day, stock in vs out)
+  - `components/activity/ActivityLog.tsx` - Searchable table (desktop) + card list (mobile)
+- [x] **6.3** Create activity page: `/protected/activity/page.tsx`
+- [x] **6.4** Implement aggregation queries for summaries (`lib/actions/activity.ts`)
 
 **SQL Script - 006_create_activity_logs.sql:**
 ```sql
@@ -315,12 +316,12 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 
 **Goal:** Production-ready application
 
-- [ ] **7.1** Add loading states and skeleton screens
-- [ ] **7.2** Implement error boundaries and error handling
-- [ ] **7.3** Add toast notifications for actions
-- [ ] **7.4** Mobile responsiveness testing and fixes
-- [ ] **7.5** Accessibility audit (keyboard navigation, ARIA labels)
-- [ ] **7.6** Performance optimization (pagination, query optimization)
+- [x] **7.1** Add loading states and skeleton screens — `loading.tsx` for all 5 protected routes, matching page layouts
+- [x] **7.2** Implement error boundaries — `app/protected/error.tsx` with reset button, covers all protected pages
+- [x] **7.3** Toast notifications — Sonner integrated in Phase 2; all CRUD and resolve actions show toasts
+- [x] **7.4** Mobile responsiveness — sidebar hidden on mobile with bottom nav, tables convert to card lists, charts are responsive containers, bottom padding accounts for nav bar
+- [x] **7.5** Accessibility — `aria-label` on all search inputs, `aria-current="page"` on active nav links (sidebar + mobile nav), `role="status"` + `aria-live="polite"` on dynamic counts, `sr-only` on icon-only buttons
+- [x] **7.6** Performance — "Show more" pagination (20/page) on TransactionHistory and ActivityLog; dashboard data fetched in parallel with `Promise.all`
 
 ---
 
