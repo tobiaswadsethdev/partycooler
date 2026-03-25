@@ -1,7 +1,7 @@
 export interface Profile {
   id: string
   email: string
-  device_name: string
+  name: string
   created_at: string
   updated_at: string
 }
@@ -11,8 +11,6 @@ export interface Product {
   user_id: string
   name: string
   category: string | null
-  sku: string | null
-  unit_price: number | null
   reorder_threshold: number
   created_at: string
   updated_at: string
@@ -24,10 +22,10 @@ export interface InventoryTransaction {
   product_id: string
   transaction_type: 'ingress' | 'egress'
   quantity: number
-  notes: string | null
   transaction_date: string
   created_at: string
   product?: Product
+  profile?: { name: string; email: string }
 }
 
 export interface InventoryStatus {
@@ -58,6 +56,7 @@ export interface ActivityLog {
   entity_id: string | null
   details: Record<string, unknown> | null
   created_at: string
+  profile?: { name: string; email: string }
 }
 
 export interface DashboardStats {

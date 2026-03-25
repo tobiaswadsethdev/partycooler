@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 import { Separator } from '@/components/ui/separator'
+import { ThemeToggle } from '@/components/layout/ThemeToggle'
 
 const routeTitles: Record<string, string> = {
   '/protected/dashboard': 'Dashboard',
@@ -10,6 +11,7 @@ const routeTitles: Record<string, string> = {
   '/protected/inventory': 'Inventory',
   '/protected/alerts': 'Alerts',
   '/protected/activity': 'Activity',
+  '/protected/settings': 'Settings',
 }
 
 export function Header() {
@@ -21,6 +23,9 @@ export function Header() {
       <SidebarTrigger className="-ml-1" />
       <Separator orientation="vertical" className="mr-2 h-4" />
       <h1 className="text-base font-semibold">{title}</h1>
+      <div className="ml-auto">
+        <ThemeToggle />
+      </div>
     </header>
   )
 }

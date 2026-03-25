@@ -70,12 +70,11 @@ export function InventoryStatusChart({ data }: InventoryStatusChartProps) {
                 axisLine={false}
                 width={110}
                 tick={{ fontSize: 12 }}
-                tickFormatter={(v: string) => v.length > 14 ? v.slice(0, 14) + '…' : v}
               />
               <ChartTooltip
                 content={
                   <ChartTooltipContent
-                    formatter={(value) => [`${value} units`, 'In stock']}
+                    formatter={(value) => `${value} units in stock`}
                   />
                 }
               />

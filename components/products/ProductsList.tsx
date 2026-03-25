@@ -34,8 +34,7 @@ export function ProductsList({ products }: ProductsListProps) {
   const filtered = products.filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||
-      (p.category ?? '').toLowerCase().includes(search.toLowerCase()) ||
-      (p.sku ?? '').toLowerCase().includes(search.toLowerCase())
+      (p.category ?? '').toLowerCase().includes(search.toLowerCase())
   )
 
   if (products.length === 0) {
@@ -75,8 +74,6 @@ export function ProductsList({ products }: ProductsListProps) {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Category</TableHead>
-              <TableHead>SKU</TableHead>
-              <TableHead className="text-right">Unit price</TableHead>
               <TableHead className="text-right">Reorder at</TableHead>
               <TableHead className="w-20" />
             </TableRow>
@@ -84,7 +81,7 @@ export function ProductsList({ products }: ProductsListProps) {
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
                   No products match your search.
                 </TableCell>
               </TableRow>
@@ -98,14 +95,6 @@ export function ProductsList({ products }: ProductsListProps) {
                     ) : (
                       <span className="text-muted-foreground text-sm">—</span>
                     )}
-                  </TableCell>
-                  <TableCell className="font-mono text-sm text-muted-foreground">
-                    {product.sku ?? '—'}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {product.unit_price != null
-                      ? `$${product.unit_price.toFixed(2)}`
-                      : '—'}
                   </TableCell>
                   <TableCell className="text-right tabular-nums">
                     {product.reorder_threshold}
@@ -138,14 +127,8 @@ export function ProductsList({ products }: ProductsListProps) {
                   {product.category && (
                     <Badge variant="secondary" className="text-xs">{product.category}</Badge>
                   )}
-                  {product.sku && (
-                    <span className="font-mono">{product.sku}</span>
-                  )}
                 </div>
                 <div className="flex gap-4 text-xs text-muted-foreground">
-                  {product.unit_price != null && (
-                    <span>${product.unit_price.toFixed(2)} / unit</span>
-                  )}
                   <span>Reorder at {product.reorder_threshold}</span>
                 </div>
               </div>

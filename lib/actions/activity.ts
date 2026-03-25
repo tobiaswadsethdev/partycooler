@@ -70,7 +70,7 @@ export async function getActivityData(): Promise<ActivityData> {
   const [logsResult, daily, weekly, monthly] = await Promise.all([
     supabase
       .from('activity_logs')
-      .select('*')
+      .select('*, profile:profiles(name, email)')
       .order('created_at', { ascending: false })
       .limit(100),
     summarisePeriod(supabase, dayAgo, 'daily'),
@@ -80,8 +80,8 @@ export async function getActivityData(): Promise<ActivityData> {
 
   // Build 30-day chart data from inventory_transactions
   const thirtyDaysAgo = new Date(now)
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 29)
-  thirtyDaysAgo.setHours(0, 0, 0, 0)
+  thirtyDaysAgo.setUTCHours(0, 0, 0, 0)
+  thirtyDaysAgo.setUTCDate(thirtyDaysAgo.getUTCDate() - 29)
 
   const { data: txData } = await supabase
     .from('inventory_transactions')
@@ -89,11 +89,11 @@ export async function getActivityData(): Promise<ActivityData> {
     .gte('transaction_date', thirtyDaysAgo.toISOString())
     .order('transaction_date', { ascending: true })
 
-  // Build a map of YYYY-MM-DD → totals
+  // Build a map of YYYY-MM-DD (UTC) → totals
   const chartMap = new Map<string, { ingress: number; egress: number }>()
   for (let i = 0; i < 30; i++) {
     const d = new Date(thirtyDaysAgo)
-    d.setDate(d.getDate() + i)
+    d.setUTCDate(d.getUTCDate() + i)
     chartMap.set(d.toISOString().slice(0, 10), { ingress: 0, egress: 0 })
   }
 
@@ -106,9 +106,9 @@ export async function getActivityData(): Promise<ActivityData> {
   }
 
   const chartData: ActivityChartPoint[] = Array.from(chartMap.entries()).map(([date, vals]) => {
-    const d = new Date(date + 'T00:00:00')
+    const d = new Date(date + 'T12:00:00Z')
     return {
-      date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }),
       ingress: vals.ingress,
       egress: vals.egress,
       net: vals.ingress - vals.egress,

@@ -24,7 +24,7 @@ A responsive web application for real-time inventory management of drinks and pr
 - [x] **1.1** Request Supabase integration and configure environment variables
 - [x] **1.2** Set up Supabase client/server utilities (`lib/supabase/`)
 - [x] **1.3** Create route protection (`proxy.ts` — Next.js 16 uses `proxy` convention, not `middleware`)
-- [x] **1.4** Run `scripts/001_create_profiles.sql` - Create profiles table with RLS
+- [x] **1.4** Create profiles table with RLS and signup trigger (see `scripts/schema.sql`)
 - [x] **1.5** Build authentication pages:
   - `/auth/login/page.tsx`
   - `/auth/sign-up/page.tsx`
@@ -71,7 +71,7 @@ FOR EACH ROW EXECUTE FUNCTION handle_new_user();
 
 **Goal:** Full CRUD operations for product catalog
 
-- [x] **2.1** Run `scripts/002_create_products.sql` - Create products table
+- [x] **2.1** Create products table (see `scripts/schema.sql`)
 - [x] **2.2** Create TypeScript types (`lib/types/index.ts`)
 - [x] **2.3** Build components:
   - `components/products/ProductsList.tsx` - Table with sorting/filtering
@@ -114,8 +114,8 @@ CREATE POLICY "products_delete_own" ON products FOR DELETE USING (auth.uid() = u
 
 **Goal:** Record and track stock movements (ingress/egress)
 
-- [x] **3.1** Run `scripts/003_create_inventory_transactions.sql`
-- [x] **3.2** Run `scripts/004_create_inventory_status.sql` (with trigger)
+- [x] **3.1** Create inventory_transactions table (see `scripts/schema.sql`)
+- [x] **3.2** Create inventory_status table with update trigger (see `scripts/schema.sql`)
 - [x] **3.3** Build components:
   - `components/inventory/TransactionForm.tsx` - Record transactions
   - `components/inventory/TransactionHistory.tsx` - History table
@@ -217,7 +217,7 @@ FOR EACH ROW EXECUTE FUNCTION update_inventory_status();
 
 **Goal:** Automated low stock alerts and management
 
-- [x] **5.1** Run `scripts/005_create_alerts.sql` (with trigger)
+- [x] **5.1** Create alerts table with low-stock trigger (see `scripts/schema.sql`)
 - [x] **5.2** Build components:
   - `components/alerts/AlertsList.tsx` - Tabbed active/resolved lists with "Resolve all" button
   - `components/alerts/AlertItem.tsx` - Individual alert card with resolve + delete actions
@@ -281,7 +281,7 @@ FOR EACH ROW EXECUTE FUNCTION create_low_stock_alert();
 
 **Goal:** Historical reporting and activity logs
 
-- [x] **6.1** Run `scripts/006_create_activity_logs.sql` (includes trigger to auto-log every inventory transaction)
+- [x] **6.1** Create activity_logs table with auto-log trigger (see `scripts/schema.sql`)
 - [x] **6.2** Build components:
   - `components/activity/ActivitySummaryCards.tsx` - Daily/weekly/monthly stat cards (ingress, egress, net, count)
   - `components/activity/ActivityChart.tsx` - Grouped bar chart (30-day, stock in vs out)
@@ -325,17 +325,29 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 
 ---
 
+### Phase 8: Settings & Dark Mode
+
+**Goal:** User profile management and system-aware theme switching
+
+- [x] **8.1** Add `name` column to `profiles` table (consolidated into `scripts/schema.sql`)
+- [x] **8.2** Update sign-up form to collect display name on registration
+- [x] **8.3** Create `lib/actions/profile.ts` — `getProfile` and `updateProfile` server actions
+- [x] **8.4** Build `components/settings/ProfileForm.tsx` — editable name field, read-only email
+- [x] **8.5** Create settings page: `/protected/settings/page.tsx`
+- [x] **8.6** Update `AppSidebar` to display user's name (or email fallback) and Settings link
+- [x] **8.7** Update protected layout to fetch and pass profile name to sidebar
+- [x] **8.8** Wire up `ThemeProvider` (`next-themes`) in `app/layout.tsx` with `attribute="class"`, `defaultTheme="system"`, `enableSystem`
+- [x] **8.9** Create `components/layout/ThemeToggle.tsx` — ghost icon button toggling Sun/Moon with mounted guard
+- [x] **8.10** Add `ThemeToggle` to `Header` (top-right, `ml-auto`) and add Settings route title
+
+---
+
 ## Directory Structure
 
 ```
 /vercel/share/v0-project/
-├── scripts/                          # Database migration scripts
-│   ├── 001_create_profiles.sql
-│   ├── 002_create_products.sql
-│   ├── 003_create_inventory_transactions.sql
-│   ├── 004_create_inventory_status.sql
-│   ├── 005_create_alerts.sql
-│   └── 006_create_activity_logs.sql
+├── scripts/
+│   └── schema.sql                    # Full baseline schema (all tables, triggers, RLS)
 │
 ├── lib/
 │   ├── supabase/
@@ -347,16 +359,18 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 │   ├── actions/
 │   │   ├── products.ts               # Product server actions
 │   │   ├── transactions.ts           # Transaction server actions
-│   │   └── alerts.ts                 # Alert server actions
+│   │   ├── alerts.ts                 # Alert server actions
+│   │   └── profile.ts                # Profile server actions
 │   └── utils/
 │       └── calculations.ts           # Helper functions
 │
 ├── components/
 │   ├── ui/                           # shadcn/ui (pre-installed)
 │   ├── layout/
-│   │   ├── Sidebar.tsx
+│   │   ├── AppSidebar.tsx
 │   │   ├── Header.tsx
-│   │   └── MobileNav.tsx
+│   │   ├── MobileNav.tsx
+│   │   └── ThemeToggle.tsx
 │   ├── dashboard/
 │   │   ├── InventorySummaryCards.tsx
 │   │   ├── InventoryStatusChart.tsx
@@ -375,10 +389,12 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 │   ├── alerts/
 │   │   ├── AlertsList.tsx
 │   │   └── AlertItem.tsx
-│   └── activity/
-│       ├── ActivitySummaryCards.tsx
-│       ├── ActivityChart.tsx
-│       └── ActivityLog.tsx
+│   ├── activity/
+│   │   ├── ActivitySummaryCards.tsx
+│   │   ├── ActivityChart.tsx
+│   │   └── ActivityLog.tsx
+│   └── settings/
+│       └── ProfileForm.tsx
 │
 ├── app/
 │   ├── layout.tsx
@@ -395,9 +411,10 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 │       ├── products/page.tsx
 │       ├── inventory/page.tsx
 │       ├── alerts/page.tsx
-│       └── activity/page.tsx
+│       ├── activity/page.tsx
+│       └── settings/page.tsx
 │
-├── middleware.ts                      # Session protection
+├── proxy.ts                           # Route protection (Next.js 16)
 └── PLAN.md                           # This file
 ```
 
@@ -411,7 +428,7 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 export interface Profile {
   id: string
   email: string
-  device_name: string
+  name: string | null
   created_at: string
   updated_at: string
 }
@@ -503,6 +520,7 @@ export interface ActivitySummary {
 | `/protected/inventory` | Inventory | Record transactions, view history |
 | `/protected/alerts` | Alerts | Low stock alerts management |
 | `/protected/activity` | Activity | Historical summaries and logs |
+| `/protected/settings` | Settings | Profile name management |
 
 ---
 

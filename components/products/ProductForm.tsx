@@ -19,8 +19,6 @@ import type { ProductFormValues } from '@/lib/actions/products'
 const productSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   category: z.string().optional(),
-  sku: z.string().optional(),
-  unit_price: z.coerce.number().min(0).optional(),
   reorder_threshold: z.coerce.number().int().min(0).default(5),
 })
 
@@ -37,8 +35,6 @@ export function ProductForm({ defaultValues, onSubmit, submitLabel, onCancel }: 
     defaultValues: {
       name: defaultValues?.name ?? '',
       category: defaultValues?.category ?? '',
-      sku: defaultValues?.sku ?? '',
-      unit_price: defaultValues?.unit_price ?? undefined,
       reorder_threshold: defaultValues?.reorder_threshold ?? 5,
     },
   })
@@ -69,42 +65,6 @@ export function ProductForm({ defaultValues, onSubmit, submitLabel, onCancel }: 
                 <FormLabel>Category</FormLabel>
                 <FormControl>
                   <Input placeholder="e.g. Soft drinks" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="sku"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>SKU</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g. CC-330" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="unit_price"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Unit price</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    {...field}
-                    value={field.value ?? ''}
-                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

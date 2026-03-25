@@ -35,6 +35,14 @@ The color palette is intentionally restrained to maintain focus on data. We use 
 | `--destructive` | Alerts, egress transactions, low stock | Red tones for "stock out" and warnings |
 | `--warning` | Approaching thresholds, expiry warnings | Amber for attention without alarm |
 
+### Dark Mode
+
+Dark mode is implemented via `next-themes` with Tailwind's `class` strategy. The `ThemeProvider` wraps the app root with `attribute="class"`, `defaultTheme="system"`, and `enableSystem` so the initial theme matches the OS preference. Toggling adds or removes the `.dark` class on `<html>`, which activates the `.dark { }` token overrides in `globals.css`.
+
+- All color tokens have dark-mode variants defined in `globals.css` under `.dark`
+- Colors use the OKLCh color space for perceptually uniform dark and light variants
+- User preference is persisted to `localStorage` by next-themes
+
 ### Color Usage Rules
 
 1. **Never use gradients** unless explicitly requested - solid colors only
@@ -180,6 +188,16 @@ Styling:
 **Input Sizing:**
 - Default height: 40px (h-10)
 - Comfortable touch targets on mobile: minimum 44px
+
+### ThemeToggle
+
+`components/layout/ThemeToggle.tsx` — ghost icon button placed in the header (`ml-auto`).
+
+- Uses `useTheme()` from `next-themes`
+- Shows `Moon` icon in light mode, `Sun` icon in dark mode (both `h-4 w-4`)
+- Renders `null` until mounted to avoid hydration mismatch
+- `aria-label="Toggle theme"` for accessibility
+- Only visible in the protected layout header
 
 ### Buttons
 
@@ -398,6 +416,8 @@ Use Lucide React icons consistently throughout the application.
 | Alert | `AlertTriangle` | Low stock warnings |
 | Dashboard | `LayoutDashboard` | Navigation |
 | Settings | `Settings` | Configuration |
+| Light mode | `Sun` | ThemeToggle (switch to light) |
+| Dark mode | `Moon` | ThemeToggle (switch to dark) |
 | Add | `Plus` | Create actions |
 | Edit | `Pencil` | Modify actions |
 | Delete | `Trash2` | Remove actions |

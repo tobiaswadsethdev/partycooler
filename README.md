@@ -39,16 +39,13 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=your-publishable-key
 
 ### 3. Set up the database
 
-Run each SQL script in order in your [Supabase SQL editor](https://supabase.com/dashboard):
+Run the baseline schema in your [Supabase SQL editor](https://supabase.com/dashboard):
 
 ```
-scripts/001_create_profiles.sql
-scripts/002_create_products.sql
-scripts/003_create_inventory_transactions.sql
-scripts/004_create_inventory_status.sql
-scripts/005_create_alerts.sql          ← Phase 5 (pending)
-scripts/006_create_activity_logs.sql   ← Phase 6 (pending)
+scripts/schema.sql
 ```
+
+This single file creates all tables, indexes, RLS policies, and triggers in the correct order.
 
 > **Tip:** Disable email confirmation in Supabase Auth settings during development for faster testing.
 
@@ -71,17 +68,19 @@ partycooler/
 │   └── protected/                # Authenticated pages (dashboard, products, inventory, …)
 ├── components/
 │   ├── ui/                       # shadcn/ui primitives (57 components)
-│   ├── layout/                   # AppSidebar, Header, MobileNav
+│   ├── layout/                   # AppSidebar, Header, MobileNav, ThemeToggle
 │   ├── dashboard/                # KPI cards, charts, alert banner
 │   ├── products/                 # ProductsList, AddProductModal, EditProductModal, DeleteProductButton
 │   ├── inventory/                # TransactionForm, TransactionHistory, QuickActionsPanel
 │   ├── alerts/                   # AlertsList, AlertItem
-│   └── activity/                 # ActivitySummaryCards, ActivityChart, ActivityLog
+│   ├── activity/                 # ActivitySummaryCards, ActivityChart, ActivityLog
+│   └── settings/                 # ProfileForm
 ├── lib/
 │   ├── supabase/                 # Browser and server Supabase clients
 │   ├── actions/                  # Server Actions (products, transactions, dashboard)
+│   ├── actions/                  # Server Actions (products, transactions, dashboard, profile)
 │   └── types/                    # TypeScript interfaces
-├── scripts/                      # SQL migration files
+├── scripts/                      # Database schema (schema.sql)
 ├── proxy.ts                      # Route protection (Next.js 16 proxy convention)
 ├── PLAN.md                       # Implementation roadmap
 └── DESIGN.md                     # Design system specification
@@ -115,6 +114,7 @@ partycooler/
 | `/protected/inventory` | Record stock in/out, view transaction history |
 | `/protected/alerts` | Low-stock alert management — active/resolved tabs, resolve all |
 | `/protected/activity` | Daily/weekly/monthly summaries, 30-day bar chart, transaction log |
+| `/protected/settings` | Profile management (display name) |
 
 ---
 
@@ -124,6 +124,7 @@ partycooler/
 - **Database-side calculations** — inventory totals and low-stock alerts are computed by PostgreSQL triggers, not application code.
 - **Mobile-first** — sidebar on desktop, bottom navigation bar on mobile.
 - **Proxy convention** — Next.js 16 uses `proxy.ts` (not `middleware.ts`) with an exported `proxy` function.
+- **Dark mode** — system-aware theme switching via `next-themes`; toggle in the header persists preference to localStorage.
 
 ---
 

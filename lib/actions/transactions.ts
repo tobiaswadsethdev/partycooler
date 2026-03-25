@@ -9,7 +9,6 @@ const transactionSchema = z.object({
   product_id: z.string().uuid('Please select a product'),
   transaction_type: z.enum(['ingress', 'egress']),
   quantity: z.coerce.number().int().min(1, 'Quantity must be at least 1'),
-  notes: z.string().optional(),
 })
 
 export type TransactionFormValues = z.infer<typeof transactionSchema>
@@ -33,7 +32,6 @@ export async function createTransaction(values: TransactionFormValues): Promise<
     product_id: parsed.data.product_id,
     transaction_type: parsed.data.transaction_type,
     quantity: parsed.data.quantity,
-    notes: parsed.data.notes || null,
   })
 
   if (error) return { success: false, error: error.message }
@@ -47,7 +45,7 @@ export async function getTransactions(limit = 50): Promise<InventoryTransaction[
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('inventory_transactions')
-    .select('*, product:products(id, name, category, sku, unit_price, reorder_threshold, created_at, updated_at, user_id)')
+    .select('*, product:products(id, name, category, reorder_threshold, created_at, updated_at, user_id), profile:profiles(name, email)')
     .order('transaction_date', { ascending: false })
     .limit(limit)
 
@@ -59,7 +57,7 @@ export async function getInventoryStatus(): Promise<InventoryStatus[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('inventory_status')
-    .select('*, product:products(id, name, category, sku, unit_price, reorder_threshold, created_at, updated_at, user_id)')
+    .select('*, product:products(id, name, category, reorder_threshold, created_at, updated_at, user_id)')
     .order('last_updated', { ascending: false })
 
   if (error) return []

@@ -8,8 +8,6 @@ import type { Product } from '@/lib/types'
 const productSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   category: z.string().optional(),
-  sku: z.string().optional(),
-  unit_price: z.coerce.number().min(0).optional(),
   reorder_threshold: z.coerce.number().int().min(0).default(5),
 })
 
@@ -35,8 +33,6 @@ export async function createProduct(values: ProductFormValues): Promise<ActionRe
       user_id: user.id,
       name: parsed.data.name,
       category: parsed.data.category || null,
-      sku: parsed.data.sku || null,
-      unit_price: parsed.data.unit_price ?? null,
       reorder_threshold: parsed.data.reorder_threshold,
     })
     .select()
@@ -63,8 +59,6 @@ export async function updateProduct(id: string, values: ProductFormValues): Prom
     .update({
       name: parsed.data.name,
       category: parsed.data.category || null,
-      sku: parsed.data.sku || null,
-      unit_price: parsed.data.unit_price ?? null,
       reorder_threshold: parsed.data.reorder_threshold,
       updated_at: new Date().toISOString(),
     })

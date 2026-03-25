@@ -65,10 +65,10 @@ export async function getDashboardData(): Promise<DashboardData> {
     .select('id', { count: 'exact', head: true })
     .gte('transaction_date', sevenDaysAgo.toISOString())
 
-  // Transaction trend: last 14 days grouped by date
+  // Transaction trend: last 14 days grouped by date (all in UTC to match Supabase timestamps)
   const fourteenDaysAgo = new Date()
-  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 13)
-  fourteenDaysAgo.setHours(0, 0, 0, 0)
+  fourteenDaysAgo.setUTCHours(0, 0, 0, 0)
+  fourteenDaysAgo.setUTCDate(fourteenDaysAgo.getUTCDate() - 13)
 
   const { data: txData } = await supabase
     .from('inventory_transactions')
@@ -76,11 +76,11 @@ export async function getDashboardData(): Promise<DashboardData> {
     .gte('transaction_date', fourteenDaysAgo.toISOString())
     .order('transaction_date', { ascending: true })
 
-  // Build a map keyed by "YYYY-MM-DD"
+  // Build a map keyed by "YYYY-MM-DD" (UTC)
   const trendMap = new Map<string, { ingress: number; egress: number }>()
   for (let i = 0; i < 14; i++) {
     const d = new Date(fourteenDaysAgo)
-    d.setDate(d.getDate() + i)
+    d.setUTCDate(d.getUTCDate() + i)
     const key = d.toISOString().slice(0, 10)
     trendMap.set(key, { ingress: 0, egress: 0 })
   }
@@ -94,8 +94,8 @@ export async function getDashboardData(): Promise<DashboardData> {
   }
 
   const trendData: TrendDataPoint[] = Array.from(trendMap.entries()).map(([date, vals]) => {
-    const d = new Date(date + 'T00:00:00')
-    const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    const d = new Date(date + 'T12:00:00Z')
+    const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
     return { date: label, ...vals }
   })
 

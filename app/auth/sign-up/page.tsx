@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 
 const signUpSchema = z
   .object({
+    name: z.string().min(1, 'Name is required'),
     email: z.string().email('Please enter a valid email address'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
     confirmPassword: z.string(),
@@ -31,7 +32,7 @@ export default function SignUpPage() {
 
   const form = useForm<SignUpValues>({
     resolver: zodResolver(signUpSchema),
-    defaultValues: { email: '', password: '', confirmPassword: '' },
+    defaultValues: { name: '', email: '', password: '', confirmPassword: '' },
   })
 
   async function onSubmit(values: SignUpValues) {
@@ -40,6 +41,9 @@ export default function SignUpPage() {
     const { error } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
+      options: {
+        data: { name: values.name },
+      },
     })
 
     if (error) {
@@ -59,6 +63,19 @@ export default function SignUpPage() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Your name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="email"

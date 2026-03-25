@@ -37,12 +37,10 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
   const filtered = transactions.filter((t) => {
     const productName = t.product?.name ?? ''
     const category = t.product?.category ?? ''
-    const notes = t.notes ?? ''
     const q = search.toLowerCase()
     return (
       productName.toLowerCase().includes(q) ||
-      category.toLowerCase().includes(q) ||
-      notes.toLowerCase().includes(q)
+      category.toLowerCase().includes(q)
     )
   })
 
@@ -87,7 +85,7 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
               <TableHead>Product</TableHead>
               <TableHead>Type</TableHead>
               <TableHead className="text-right">Quantity</TableHead>
-              <TableHead>Notes</TableHead>
+              <TableHead>By</TableHead>
               <TableHead className="text-right">Date</TableHead>
             </TableRow>
           </TableHeader>
@@ -131,8 +129,8 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
                   <TableCell className="text-right tabular-nums font-medium">
                     {t.transaction_type === 'ingress' ? '+' : '-'}{t.quantity}
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground max-w-xs truncate">
-                    {t.notes ?? '—'}
+                  <TableCell className="text-sm text-muted-foreground">
+                    {t.profile?.name ?? t.profile?.email ?? '—'}
                   </TableCell>
                   <TableCell className="text-right text-sm text-muted-foreground tabular-nums">
                     {format(new Date(t.transaction_date), 'MMM d, HH:mm')}
@@ -181,11 +179,11 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
                     {t.transaction_type === 'ingress' ? '+' : '-'}{t.quantity}
                   </span>
                 </div>
-                {t.notes && (
-                  <p className="text-sm text-muted-foreground truncate">{t.notes}</p>
-                )}
                 <p className="text-xs text-muted-foreground mt-1">
                   {format(new Date(t.transaction_date), 'MMM d, yyyy HH:mm')}
+                  {t.profile && (
+                    <> · {t.profile.name ?? t.profile.email}</>
+                  )}
                 </p>
               </div>
             </div>

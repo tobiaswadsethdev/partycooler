@@ -101,13 +101,14 @@ export function ActivityLog({ logs }: ActivityLogProps) {
             <TableRow>
               <TableHead>Action</TableHead>
               <TableHead>Details</TableHead>
+              <TableHead>By</TableHead>
               <TableHead className="text-right">Date</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
                   No activity matches your search.
                 </TableCell>
               </TableRow>
@@ -135,6 +136,9 @@ export function ActivityLog({ logs }: ActivityLogProps) {
                         </span>
                       )}
                       {notes && <span className="ml-2">{notes}</span>}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {log.profile?.name ?? log.profile?.email ?? '—'}
                     </TableCell>
                     <TableCell className="text-right text-sm text-muted-foreground tabular-nums">
                       {format(new Date(log.created_at), 'MMM d, HH:mm')}
@@ -174,6 +178,9 @@ export function ActivityLog({ logs }: ActivityLogProps) {
                   {notes && <p className="text-sm text-muted-foreground truncate">{notes}</p>}
                   <p className="text-xs text-muted-foreground mt-1">
                     {format(new Date(log.created_at), 'MMM d, yyyy HH:mm')}
+                    {log.profile && (
+                      <> · {log.profile.name ?? log.profile.email}</>
+                    )}
                   </p>
                 </div>
               </div>

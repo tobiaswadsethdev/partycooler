@@ -17,9 +17,15 @@ export default async function ProtectedLayout({
     redirect('/auth/login')
   }
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('name, email')
+    .eq('id', user.id)
+    .single()
+
   return (
     <SidebarProvider>
-      <AppSidebar email={user.email ?? ''} />
+      <AppSidebar name={profile?.name ?? null} email={profile?.email ?? user.email ?? ''} />
       <SidebarInset>
         <Header />
         <main className="flex-1 overflow-auto p-4 pb-20 md:pb-4">

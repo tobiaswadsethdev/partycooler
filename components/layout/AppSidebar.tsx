@@ -10,6 +10,7 @@ import {
   Activity,
   LogOut,
   Thermometer,
+  Settings,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -31,7 +32,12 @@ const navItems = [
   { href: '/protected/activity', label: 'Activity', icon: Activity },
 ]
 
-export function AppSidebar({ email }: { email: string }) {
+interface AppSidebarProps {
+  name: string | null
+  email: string
+}
+
+export function AppSidebar({ name, email }: AppSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
 
@@ -41,6 +47,8 @@ export function AppSidebar({ email }: { email: string }) {
     router.push('/auth/login')
     router.refresh()
   }
+
+  const isSettingsActive = pathname === '/protected/settings'
 
   return (
     <Sidebar>
@@ -78,11 +86,26 @@ export function AppSidebar({ email }: { email: string }) {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="border-t px-4 py-3">
-        <div className="flex items-center justify-between gap-2">
+      <SidebarFooter className="border-t px-2 py-2 space-y-1">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isSettingsActive}>
+              <Link
+                href="/protected/settings"
+                aria-current={isSettingsActive ? 'page' : undefined}
+                className={cn('flex items-center gap-3', isSettingsActive && 'font-medium')}
+              >
+                <Settings className="h-5 w-5" />
+                <span>Settings</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+
+        <div className="flex items-center justify-between gap-2 px-2 py-1">
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium">{email}</p>
-            <p className="text-xs text-muted-foreground">Signed in</p>
+            <p className="truncate text-sm font-medium">{name ?? email}</p>
+            {name && <p className="truncate text-xs text-muted-foreground">{email}</p>}
           </div>
           <button
             onClick={handleLogout}
