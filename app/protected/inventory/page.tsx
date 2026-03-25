@@ -1,5 +1,6 @@
 import { getProducts } from '@/lib/actions/products'
 import { getTransactions, getInventoryStatus } from '@/lib/actions/transactions'
+import { createClient } from '@/lib/supabase/server'
 import { TransactionForm } from '@/components/inventory/TransactionForm'
 import { TransactionHistory } from '@/components/inventory/TransactionHistory'
 import { QuickActionsPanel } from '@/components/inventory/QuickActionsPanel'
@@ -7,6 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default async function InventoryPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
   const [products, transactions, inventoryStatus] = await Promise.all([
     getProducts(),
     getTransactions(100),
@@ -31,7 +35,7 @@ export default async function InventoryPage() {
               <TabsTrigger value="quick">Quick actions</TabsTrigger>
             </TabsList>
             <TabsContent value="history" className="mt-4">
-              <TransactionHistory transactions={transactions} />
+              <TransactionHistory transactions={transactions} currentUserId={user?.id ?? null} />
             </TabsContent>
             <TabsContent value="quick" className="mt-4">
               <QuickActionsPanel

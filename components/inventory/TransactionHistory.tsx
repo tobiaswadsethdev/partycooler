@@ -23,14 +23,16 @@ import {
 } from '@/components/ui/empty'
 import { cn } from '@/lib/utils'
 import type { InventoryTransaction } from '@/lib/types'
+import { DeleteTransactionButton } from './DeleteTransactionButton'
 
 interface TransactionHistoryProps {
   transactions: InventoryTransaction[]
+  currentUserId: string | null
 }
 
 const PAGE_SIZE = 20
 
-export function TransactionHistory({ transactions }: TransactionHistoryProps) {
+export function TransactionHistory({ transactions, currentUserId }: TransactionHistoryProps) {
   const [search, setSearch] = useState('')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
@@ -87,12 +89,13 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
               <TableHead className="text-right">Quantity</TableHead>
               <TableHead className="text-right">By</TableHead>
               <TableHead className="text-right">Date</TableHead>
+              <TableHead className="w-8" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                   No transactions match your search.
                 </TableCell>
               </TableRow>
@@ -135,6 +138,11 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
                   <TableCell className="text-right text-sm text-muted-foreground tabular-nums">
                     {format(new Date(t.transaction_date), 'MMM d, HH:mm')}
                   </TableCell>
+                  <TableCell className="text-right">
+                    {t.user_id === currentUserId && (
+                      <DeleteTransactionButton id={t.id} productName={t.product?.name ?? 'item'} />
+                    )}
+                  </TableCell>
                 </TableRow>
               ))
             )}
@@ -168,16 +176,21 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
                   <p className="font-medium truncate">{t.product?.name ?? '—'}</p>
-                  <span
-                    className={cn(
-                      'shrink-0 text-sm font-semibold tabular-nums',
-                      t.transaction_type === 'ingress'
-                        ? 'text-[var(--success)]'
-                        : 'text-destructive'
+                  <div className="shrink-0 flex items-center gap-1">
+                    <span
+                      className={cn(
+                        'text-sm font-semibold tabular-nums',
+                        t.transaction_type === 'ingress'
+                          ? 'text-[var(--success)]'
+                          : 'text-destructive'
+                      )}
+                    >
+                      {t.transaction_type === 'ingress' ? '+' : '-'}{t.quantity}
+                    </span>
+                    {t.user_id === currentUserId && (
+                      <DeleteTransactionButton id={t.id} productName={t.product?.name ?? 'item'} />
                     )}
-                  >
-                    {t.transaction_type === 'ingress' ? '+' : '-'}{t.quantity}
-                  </span>
+                  </div>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   {format(new Date(t.transaction_date), 'MMM d, yyyy HH:mm')}

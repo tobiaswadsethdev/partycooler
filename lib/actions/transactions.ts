@@ -41,6 +41,32 @@ export async function createTransaction(values: TransactionFormValues): Promise<
   return { success: true }
 }
 
+export async function deleteTransaction(id: string): Promise<ActionResult> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Not authenticated' }
+
+  const { data: existing, error: fetchError } = await supabase
+    .from('inventory_transactions')
+    .select('user_id')
+    .eq('id', id)
+    .single()
+
+  if (fetchError || !existing) return { success: false, error: 'Transaction not found' }
+  if (existing.user_id !== user.id) return { success: false, error: 'You can only delete your own transactions' }
+
+  const { error } = await supabase
+    .from('inventory_transactions')
+    .delete()
+    .eq('id', id)
+
+  if (error) return { success: false, error: error.message }
+
+  revalidatePath('/protected/inventory')
+  revalidatePath('/protected/dashboard')
+  return { success: true }
+}
+
 export async function getTransactions(limit = 50): Promise<InventoryTransaction[]> {
   const supabase = await createClient()
   const { data, error } = await supabase

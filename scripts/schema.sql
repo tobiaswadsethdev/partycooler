@@ -96,6 +96,7 @@ CREATE INDEX idx_transactions_product   ON inventory_transactions(product_id, tr
 ALTER TABLE inventory_transactions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "transactions_select_any" ON inventory_transactions FOR SELECT USING (auth.uid() IS NOT NULL);
 CREATE POLICY "transactions_insert_any" ON inventory_transactions FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "transactions_delete_own" ON inventory_transactions FOR DELETE USING (auth.uid() = user_id);
 
 
 -- ---------------------------------------------------------------------------

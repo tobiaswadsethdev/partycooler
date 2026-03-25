@@ -342,6 +342,20 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 
 ---
 
+### Phase 9: Delete Own Transactions
+
+**Goal:** Allow users to delete transactions they personally recorded
+
+- [x] **9.1** Add `transactions_delete_own` RLS policy to `scripts/schema.sql` (and run in Supabase SQL editor: `CREATE POLICY "transactions_delete_own" ON inventory_transactions FOR DELETE USING (auth.uid() = user_id);`)
+- [x] **9.2** Add `deleteTransaction` server action to `lib/actions/transactions.ts` — auth check + ownership check + delete + revalidate
+- [x] **9.3** Create `components/inventory/DeleteTransactionButton.tsx` — AlertDialog confirmation, follows `DeleteProductButton` pattern
+- [x] **9.4** Update `app/protected/inventory/page.tsx` — fetch current user, pass `currentUserId` prop to `TransactionHistory`
+- [x] **9.5** Update `components/inventory/TransactionHistory.tsx` — new `currentUserId` prop, delete button column in desktop table and mobile cards (only shown for own transactions)
+
+**Note:** Deleting a transaction correctly triggers the existing `update_inventory_status` DB trigger, so inventory counts auto-update. Activity logs are not written for deletions (the `log_inventory_transaction` trigger only fires on `INSERT`).
+
+---
+
 ## Directory Structure
 
 ```
@@ -385,7 +399,8 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 │   ├── inventory/
 │   │   ├── TransactionForm.tsx
 │   │   ├── TransactionHistory.tsx
-│   │   └── QuickActionsPanel.tsx
+│   │   ├── QuickActionsPanel.tsx
+│   │   └── DeleteTransactionButton.tsx
 │   ├── alerts/
 │   │   ├── AlertsList.tsx
 │   │   └── AlertItem.tsx
