@@ -22,7 +22,8 @@ CREATE TABLE profiles (
 );
 
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "profiles_select_own" ON profiles FOR SELECT USING (auth.uid() = id);
+-- Any authenticated user can read any profile (needed for attribution display in transactions).
+CREATE POLICY "profiles_select_any" ON profiles FOR SELECT USING (auth.uid() IS NOT NULL);
 CREATE POLICY "profiles_insert_own" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "profiles_update_own" ON profiles FOR UPDATE USING (auth.uid() = id);
 
