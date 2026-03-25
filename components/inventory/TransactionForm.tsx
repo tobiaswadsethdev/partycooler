@@ -42,7 +42,7 @@ interface TransactionFormProps {
 export function TransactionForm({
   products,
   defaultProductId,
-  defaultType = 'ingress',
+  defaultType = 'egress',
   onSuccess,
 }: TransactionFormProps) {
   const form = useForm<TransactionFormValues>({
