@@ -43,7 +43,7 @@ export default async function InventoryPage() {
         </div>
 
         {/* Right: record form */}
-        <div className="lg:sticky lg:top-4 lg:self-start">
+        <div className="order-first lg:order-last lg:sticky lg:top-4 lg:self-start">
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Record transaction</CardTitle>

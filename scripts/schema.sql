@@ -2,6 +2,10 @@
 -- Partycooler — Baseline Schema
 -- Single-file setup for a fresh Supabase project.
 -- Run this once in the Supabase SQL editor on a clean database.
+--
+-- Inventory is shared across all authenticated users. user_id columns on
+-- products, inventory_transactions, and activity_logs exist for attribution
+-- only (who created/transacted), not for access control.
 -- =============================================================================
 
 
@@ -46,6 +50,8 @@ FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- ---------------------------------------------------------------------------
 -- products
+-- user_id records who created the product (attribution only).
+-- All authenticated users can read/write all products.
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE products (
@@ -59,17 +65,19 @@ CREATE TABLE products (
 );
 
 CREATE INDEX idx_products_user_id ON products(user_id);
-CREATE INDEX idx_products_category ON products(user_id, category);
+CREATE INDEX idx_products_category ON products(category);
 
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "products_select_own" ON products FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "products_insert_own" ON products FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "products_update_own" ON products FOR UPDATE USING (auth.uid() = user_id);
-CREATE POLICY "products_delete_own" ON products FOR DELETE USING (auth.uid() = user_id);
+CREATE POLICY "products_select_any" ON products FOR SELECT USING (auth.uid() IS NOT NULL);
+CREATE POLICY "products_insert_any" ON products FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "products_update_any" ON products FOR UPDATE USING (auth.uid() IS NOT NULL);
+CREATE POLICY "products_delete_any" ON products FOR DELETE USING (auth.uid() IS NOT NULL);
 
 
 -- ---------------------------------------------------------------------------
 -- inventory_transactions
+-- user_id records who made the transaction (attribution only).
+-- All authenticated users can read/write all transactions.
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE inventory_transactions (
@@ -86,35 +94,31 @@ CREATE INDEX idx_transactions_user_date ON inventory_transactions(user_id, trans
 CREATE INDEX idx_transactions_product   ON inventory_transactions(product_id, transaction_date DESC);
 
 ALTER TABLE inventory_transactions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "transactions_select_own" ON inventory_transactions FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "transactions_insert_own" ON inventory_transactions FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "transactions_select_any" ON inventory_transactions FOR SELECT USING (auth.uid() IS NOT NULL);
+CREATE POLICY "transactions_insert_any" ON inventory_transactions FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 
 
 -- ---------------------------------------------------------------------------
 -- inventory_status
--- Maintained automatically by trigger on inventory_transactions.
+-- Global quantity per product. No user_id — maintained by trigger.
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE inventory_status (
   id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id          UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  product_id       UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  product_id       UUID NOT NULL UNIQUE REFERENCES products(id) ON DELETE CASCADE,
   current_quantity INTEGER DEFAULT 0,
-  last_updated     TIMESTAMP DEFAULT NOW(),
-  UNIQUE(user_id, product_id)
+  last_updated     TIMESTAMP DEFAULT NOW()
 );
 
 ALTER TABLE inventory_status ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "status_select_own" ON inventory_status FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "status_select_any" ON inventory_status FOR SELECT USING (auth.uid() IS NOT NULL);
 
 CREATE OR REPLACE FUNCTION update_inventory_status()
 RETURNS TRIGGER AS $$
 DECLARE
-  new_quantity       INTEGER;
-  target_user_id    UUID;
+  new_quantity      INTEGER;
   target_product_id UUID;
 BEGIN
-  target_user_id    := COALESCE(NEW.user_id,    OLD.user_id);
   target_product_id := COALESCE(NEW.product_id, OLD.product_id);
 
   SELECT COALESCE(SUM(
@@ -124,16 +128,16 @@ BEGIN
   ), 0)
   INTO new_quantity
   FROM inventory_transactions
-  WHERE product_id = target_product_id AND user_id = target_user_id;
+  WHERE product_id = target_product_id;
 
-  INSERT INTO inventory_status (user_id, product_id, current_quantity, last_updated)
-  VALUES (target_user_id, target_product_id, new_quantity, NOW())
-  ON CONFLICT (user_id, product_id) DO UPDATE
+  INSERT INTO inventory_status (product_id, current_quantity, last_updated)
+  VALUES (target_product_id, new_quantity, NOW())
+  ON CONFLICT (product_id) DO UPDATE
     SET current_quantity = new_quantity, last_updated = NOW();
 
   RETURN NULL;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 CREATE TRIGGER trg_update_inventory_status
 AFTER INSERT OR UPDATE OR DELETE ON inventory_transactions
@@ -142,26 +146,26 @@ FOR EACH ROW EXECUTE FUNCTION update_inventory_status();
 
 -- ---------------------------------------------------------------------------
 -- alerts
--- Low-stock alerts are created/auto-resolved by trigger on inventory_status.
+-- Global low-stock alerts per product. No user_id — maintained by trigger.
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE alerts (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id     UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   product_id  UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   alert_type  TEXT CHECK (alert_type IN ('low_stock', 'expiry_warning')),
   is_resolved BOOLEAN DEFAULT FALSE,
   created_at  TIMESTAMP DEFAULT NOW(),
-  resolved_at TIMESTAMP
+  resolved_at TIMESTAMP,
+  UNIQUE (product_id, alert_type, is_resolved)
 );
 
-CREATE INDEX idx_alerts_user_active ON alerts(user_id, is_resolved, created_at DESC);
+CREATE INDEX idx_alerts_active ON alerts(is_resolved, created_at DESC);
 
 ALTER TABLE alerts ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "alerts_select_own" ON alerts FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "alerts_insert_own" ON alerts FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "alerts_update_own" ON alerts FOR UPDATE USING (auth.uid() = user_id);
-CREATE POLICY "alerts_delete_own" ON alerts FOR DELETE USING (auth.uid() = user_id);
+CREATE POLICY "alerts_select_any" ON alerts FOR SELECT USING (auth.uid() IS NOT NULL);
+CREATE POLICY "alerts_insert_any" ON alerts FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "alerts_update_any" ON alerts FOR UPDATE USING (auth.uid() IS NOT NULL);
+CREATE POLICY "alerts_delete_any" ON alerts FOR DELETE USING (auth.uid() IS NOT NULL);
 
 CREATE OR REPLACE FUNCTION create_low_stock_alert()
 RETURNS TRIGGER AS $$
@@ -169,24 +173,23 @@ DECLARE
   threshold INTEGER;
 BEGIN
   SELECT reorder_threshold INTO threshold
-  FROM products WHERE id = NEW.product_id;
+  FROM public.products WHERE id = NEW.product_id;
 
   IF NEW.current_quantity <= threshold THEN
-    INSERT INTO alerts (user_id, product_id, alert_type)
-    VALUES (NEW.user_id, NEW.product_id, 'low_stock')
+    INSERT INTO public.alerts (product_id, alert_type)
+    VALUES (NEW.product_id, 'low_stock')
     ON CONFLICT DO NOTHING;
   ELSE
-    UPDATE alerts
+    UPDATE public.alerts
     SET is_resolved = TRUE, resolved_at = NOW()
     WHERE product_id = NEW.product_id
-      AND user_id    = NEW.user_id
       AND alert_type = 'low_stock'
       AND is_resolved = FALSE;
   END IF;
 
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 CREATE TRIGGER trg_create_low_stock_alert
 AFTER INSERT OR UPDATE ON inventory_status
@@ -195,6 +198,8 @@ FOR EACH ROW EXECUTE FUNCTION create_low_stock_alert();
 
 -- ---------------------------------------------------------------------------
 -- activity_logs
+-- user_id records who performed the action (attribution only).
+-- All authenticated users can read all logs.
 -- Every inventory transaction is logged automatically by trigger.
 -- ---------------------------------------------------------------------------
 
@@ -211,13 +216,13 @@ CREATE TABLE activity_logs (
 CREATE INDEX idx_activity_user_date ON activity_logs(user_id, created_at DESC);
 
 ALTER TABLE activity_logs ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "activity_select_own" ON activity_logs FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "activity_select_any" ON activity_logs FOR SELECT USING (auth.uid() IS NOT NULL);
+CREATE POLICY "activity_insert_any" ON activity_logs FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 
 CREATE OR REPLACE FUNCTION log_inventory_transaction()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO activity_logs (user_id, action, entity_type, entity_id, details)
+  INSERT INTO public.activity_logs (user_id, action, entity_type, entity_id, details)
   VALUES (
     NEW.user_id,
     CASE WHEN NEW.transaction_type = 'ingress' THEN 'stock_in' ELSE 'stock_out' END,
@@ -231,7 +236,7 @@ BEGIN
   );
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 CREATE TRIGGER trg_log_inventory_transaction
 AFTER INSERT ON inventory_transactions

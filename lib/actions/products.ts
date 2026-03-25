@@ -63,7 +63,6 @@ export async function updateProduct(id: string, values: ProductFormValues): Prom
       updated_at: new Date().toISOString(),
     })
     .eq('id', id)
-    .eq('user_id', user.id)
     .select()
     .single()
 
@@ -82,7 +81,6 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
     .from('products')
     .delete()
     .eq('id', id)
-    .eq('user_id', user.id)
 
   if (error) return { success: false, error: error.message }
 

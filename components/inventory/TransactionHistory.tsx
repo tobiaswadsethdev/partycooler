@@ -85,7 +85,7 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
               <TableHead>Product</TableHead>
               <TableHead>Type</TableHead>
               <TableHead className="text-right">Quantity</TableHead>
-              <TableHead>By</TableHead>
+              <TableHead className="text-right">By</TableHead>
               <TableHead className="text-right">Date</TableHead>
             </TableRow>
           </TableHeader>
@@ -129,7 +129,7 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
                   <TableCell className="text-right tabular-nums font-medium">
                     {t.transaction_type === 'ingress' ? '+' : '-'}{t.quantity}
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="text-right text-sm text-muted-foreground">
                     {t.profile?.name ?? t.profile?.email ?? '—'}
                   </TableCell>
                   <TableCell className="text-right text-sm text-muted-foreground tabular-nums">

@@ -30,7 +30,6 @@ export interface InventoryTransaction {
 
 export interface InventoryStatus {
   id: string
-  user_id: string
   product_id: string
   current_quantity: number
   last_updated: string
@@ -39,7 +38,6 @@ export interface InventoryStatus {
 
 export interface Alert {
   id: string
-  user_id: string
   product_id: string
   alert_type: 'low_stock' | 'expiry_warning'
   is_resolved: boolean

@@ -59,10 +59,10 @@ export function InventoryStatusChart({ data }: InventoryStatusChartProps) {
             <BarChart
               data={chartData}
               layout="vertical"
-              margin={{ left: 0, right: 16, top: 0, bottom: 0 }}
+              margin={{ left: 0, right: 32, top: 0, bottom: 0 }}
             >
               <CartesianGrid horizontal={false} strokeDasharray="3 3" />
-              <XAxis type="number" tickLine={false} axisLine={false} tickFormatter={(v) => String(v)} />
+              <XAxis type="number" tickLine={false} axisLine={false} tickFormatter={(v) => String(v)} tick={{ fontSize: 11 }} />
               <YAxis
                 type="category"
                 dataKey="name"
@@ -70,6 +70,7 @@ export function InventoryStatusChart({ data }: InventoryStatusChartProps) {
                 axisLine={false}
                 width={110}
                 tick={{ fontSize: 12 }}
+                tickFormatter={(name: string) => name.length > 13 ? name.slice(0, 12) + '…' : name}
               />
               <ChartTooltip
                 content={

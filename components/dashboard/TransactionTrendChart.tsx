@@ -43,6 +43,9 @@ interface TransactionTrendChartProps {
 
 export function TransactionTrendChart({ data }: TransactionTrendChartProps) {
   const hasActivity = data.some((d) => d.ingress > 0 || d.egress > 0)
+  // Show every 4th label (indices 0, 4, 8, 12) to keep labels away from the right edge on narrow screens
+  const tickFormatter = (_: string, index: number) =>
+    index % 4 === 0 ? (data[index]?.date ?? '') : ''
 
   return (
     <Card>
@@ -78,7 +81,7 @@ export function TransactionTrendChart({ data }: TransactionTrendChartProps) {
                 tickLine={false}
                 axisLine={false}
                 tick={{ fontSize: 11 }}
-                interval="preserveStartEnd"
+                tickFormatter={tickFormatter}
               />
               <YAxis tickLine={false} axisLine={false} tickFormatter={(v) => String(v)} width={28} />
               <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />

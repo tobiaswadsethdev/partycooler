@@ -18,9 +18,9 @@ export default async function DashboardPage() {
 
       <InventorySummaryCards stats={stats} />
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <TransactionTrendChart data={trendData} />
-        <InventoryStatusChart data={inventoryStatus} />
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="min-w-0"><TransactionTrendChart data={trendData} /></div>
+        <div className="min-w-0"><InventoryStatusChart data={inventoryStatus} /></div>
       </div>
     </div>
   )

@@ -12,7 +12,7 @@ export async function getAlerts(): Promise<Alert[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('alerts')
-    .select('*, product:products(id, name, category, sku, unit_price, reorder_threshold, created_at, updated_at, user_id)')
+    .select('*, product:products(id, name, category, reorder_threshold, created_at, updated_at, user_id)')
     .order('created_at', { ascending: false })
 
   if (error) return []
@@ -28,7 +28,6 @@ export async function resolveAlert(id: string): Promise<ActionResult> {
     .from('alerts')
     .update({ is_resolved: true, resolved_at: new Date().toISOString() })
     .eq('id', id)
-    .eq('user_id', user.id)
 
   if (error) return { success: false, error: error.message }
 
@@ -45,7 +44,6 @@ export async function resolveAllAlerts(): Promise<ActionResult> {
   const { error } = await supabase
     .from('alerts')
     .update({ is_resolved: true, resolved_at: new Date().toISOString() })
-    .eq('user_id', user.id)
     .eq('is_resolved', false)
 
   if (error) return { success: false, error: error.message }
@@ -64,7 +62,6 @@ export async function deleteAlert(id: string): Promise<ActionResult> {
     .from('alerts')
     .delete()
     .eq('id', id)
-    .eq('user_id', user.id)
 
   if (error) return { success: false, error: error.message }
 
