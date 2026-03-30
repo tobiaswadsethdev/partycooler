@@ -357,12 +357,28 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 
 ---
 
+### Phase 10: Stock Diff Adjustment
+
+**Goal:** Allow users to record stock discrepancies (when physical count is lower than the app shows), specifying how many units to deduct and a mandatory reason.
+
+- [x] **10.1** Create `scripts/migration-add-adjustment.sql` — adds `notes TEXT` column, extends `transaction_type` CHECK to include `'adjustment'`, updates `update_inventory_status()` trigger to treat adjustments as deductions, updates `log_inventory_transaction()` trigger to emit `'stock_adjustment'` action with notes in details
+- [x] **10.2** Update `lib/types/index.ts` — extend `transaction_type` union to `'ingress' | 'egress' | 'adjustment'`, add `notes?: string | null` to `InventoryTransaction`
+- [x] **10.3** Add `adjustmentSchema`, `AdjustmentFormValues` type, and `createAdjustment` server action to `lib/actions/transactions.ts`
+- [x] **10.4** Create `components/inventory/AdjustmentForm.tsx` — product select with current stock hint, "units to deduct" input, required reason textarea, calls `createAdjustment`
+- [x] **10.5** Update `components/inventory/TransactionHistory.tsx` — add `txMeta()` helper for icon/color/label per type (amber `SlidersHorizontal` for adjustments), show `notes` in product cell (desktop) and below timestamp (mobile)
+- [x] **10.6** Update `app/protected/inventory/page.tsx` — add "Stock adjustment" third tab hosting `AdjustmentForm`
+
+**Note:** Adjustments reuse the existing `inventory_transactions` table. Deleting an adjustment row correctly reverts the stock via the existing trigger. Activity summaries currently bucket adjustments under egress totals (acceptable simplification).
+
+---
+
 ## Directory Structure
 
 ```
 /vercel/share/v0-project/
 ├── scripts/
-│   └── schema.sql                    # Full baseline schema (all tables, triggers, RLS)
+│   ├── schema.sql                    # Full baseline schema (all tables, triggers, RLS)
+│   └── migration-add-adjustment.sql  # Phase 10: adds notes column + adjustment transaction type
 │
 ├── lib/
 │   ├── supabase/
@@ -401,6 +417,7 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 │   │   ├── TransactionForm.tsx
 │   │   ├── TransactionHistory.tsx
 │   │   ├── QuickActionsPanel.tsx
+│   │   ├── AdjustmentForm.tsx
 │   │   └── DeleteTransactionButton.tsx
 │   ├── alerts/
 │   │   ├── AlertsList.tsx

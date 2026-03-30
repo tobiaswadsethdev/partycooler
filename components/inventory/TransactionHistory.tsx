@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { ArrowDownToLine, ArrowUpFromLine, Search, ChevronDown } from 'lucide-react'
+import { ArrowDownToLine, ArrowUpFromLine, SlidersHorizontal, Search, ChevronDown } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -24,6 +24,38 @@ import {
 import { cn } from '@/lib/utils'
 import type { InventoryTransaction } from '@/lib/types'
 import { DeleteTransactionButton } from './DeleteTransactionButton'
+
+function txMeta(type: InventoryTransaction['transaction_type']) {
+  switch (type) {
+    case 'ingress':
+      return {
+        icon: <ArrowDownToLine className="h-4 w-4" />,
+        color: 'text-[var(--success)]',
+        bg: 'bg-[var(--success)]/10',
+        badgeClass: 'bg-[var(--success)]/10 text-[var(--success)]',
+        label: 'Stock in',
+        sign: '+',
+      }
+    case 'egress':
+      return {
+        icon: <ArrowUpFromLine className="h-4 w-4" />,
+        color: 'text-destructive',
+        bg: 'bg-destructive/10',
+        badgeClass: 'bg-destructive/10 text-destructive',
+        label: 'Stock out',
+        sign: '-',
+      }
+    case 'adjustment':
+      return {
+        icon: <SlidersHorizontal className="h-4 w-4" />,
+        color: 'text-amber-600',
+        bg: 'bg-amber-500/10',
+        badgeClass: 'bg-amber-500/10 text-amber-600',
+        label: 'Adjustment',
+        sign: '-',
+      }
+  }
+}
 
 interface TransactionHistoryProps {
   transactions: InventoryTransaction[]
@@ -100,14 +132,12 @@ export function TransactionHistory({ transactions, currentUserId }: TransactionH
                 </TableCell>
               </TableRow>
             ) : (
-              visible.map((t) => (
+              visible.map((t) => {
+                const meta = txMeta(t.transaction_type)
+                return (
                 <TableRow key={t.id}>
                   <TableCell>
-                    {t.transaction_type === 'ingress' ? (
-                      <ArrowDownToLine className="h-4 w-4 text-[var(--success)]" />
-                    ) : (
-                      <ArrowUpFromLine className="h-4 w-4 text-destructive" />
-                    )}
+                    <span className={meta.color}>{meta.icon}</span>
                   </TableCell>
                   <TableCell>
                     <div>
@@ -115,22 +145,18 @@ export function TransactionHistory({ transactions, currentUserId }: TransactionH
                       {t.product?.category && (
                         <p className="text-xs text-muted-foreground">{t.product.category}</p>
                       )}
+                      {t.notes && (
+                        <p className="text-xs text-muted-foreground italic mt-0.5">{t.notes}</p>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      variant="secondary"
-                      className={cn(
-                        t.transaction_type === 'ingress'
-                          ? 'bg-[var(--success)]/10 text-[var(--success)]'
-                          : 'bg-destructive/10 text-destructive'
-                      )}
-                    >
-                      {t.transaction_type === 'ingress' ? 'Stock in' : 'Stock out'}
+                    <Badge variant="secondary" className={cn(meta.badgeClass)}>
+                      {meta.label}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right tabular-nums font-medium">
-                    {t.transaction_type === 'ingress' ? '+' : '-'}{t.quantity}
+                    {meta.sign}{t.quantity}
                   </TableCell>
                   <TableCell className="text-right text-sm text-muted-foreground">
                     {t.profile?.name ?? t.profile?.email ?? '—'}
@@ -144,7 +170,7 @@ export function TransactionHistory({ transactions, currentUserId }: TransactionH
                     )}
                   </TableCell>
                 </TableRow>
-              ))
+              )})}
             )}
           </TableBody>
         </Table>
@@ -157,35 +183,25 @@ export function TransactionHistory({ transactions, currentUserId }: TransactionH
             No transactions match your search.
           </p>
         ) : (
-          visible.map((t) => (
+          visible.map((t) => {
+            const meta = txMeta(t.transaction_type)
+            return (
             <div key={t.id} className="flex items-start gap-3 rounded-md border bg-card p-4">
               <div
                 className={cn(
                   'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
-                  t.transaction_type === 'ingress'
-                    ? 'bg-[var(--success)]/10 text-[var(--success)]'
-                    : 'bg-destructive/10 text-destructive'
+                  meta.bg,
+                  meta.color,
                 )}
               >
-                {t.transaction_type === 'ingress' ? (
-                  <ArrowDownToLine className="h-4 w-4" />
-                ) : (
-                  <ArrowUpFromLine className="h-4 w-4" />
-                )}
+                {meta.icon}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
                   <p className="font-medium truncate">{t.product?.name ?? '—'}</p>
                   <div className="shrink-0 flex items-center gap-1">
-                    <span
-                      className={cn(
-                        'text-sm font-semibold tabular-nums',
-                        t.transaction_type === 'ingress'
-                          ? 'text-[var(--success)]'
-                          : 'text-destructive'
-                      )}
-                    >
-                      {t.transaction_type === 'ingress' ? '+' : '-'}{t.quantity}
+                    <span className={cn('text-sm font-semibold tabular-nums', meta.color)}>
+                      {meta.sign}{t.quantity}
                     </span>
                     {t.user_id === currentUserId && (
                       <DeleteTransactionButton id={t.id} productName={t.product?.name ?? 'item'} />
@@ -198,9 +214,12 @@ export function TransactionHistory({ transactions, currentUserId }: TransactionH
                     <> · {t.profile.name ?? t.profile.email}</>
                   )}
                 </p>
+                {t.notes && (
+                  <p className="text-xs text-muted-foreground italic mt-0.5">{t.notes}</p>
+                )}
               </div>
             </div>
-          ))
+          )})}
         )}
       </div>
 

@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { TransactionForm } from '@/components/inventory/TransactionForm'
 import { TransactionHistory } from '@/components/inventory/TransactionHistory'
 import { QuickActionsPanel } from '@/components/inventory/QuickActionsPanel'
+import { AdjustmentForm } from '@/components/inventory/AdjustmentForm'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
@@ -33,6 +34,7 @@ export default async function InventoryPage() {
             <TabsList>
               <TabsTrigger value="history">Transaction history</TabsTrigger>
               <TabsTrigger value="quick">Quick actions</TabsTrigger>
+              <TabsTrigger value="adjust">Stock adjustment</TabsTrigger>
             </TabsList>
             <TabsContent value="history" className="mt-4">
               <TransactionHistory transactions={transactions} currentUserId={user?.id ?? null} />
@@ -42,6 +44,15 @@ export default async function InventoryPage() {
                 products={products}
                 inventoryStatus={inventoryStatus}
               />
+            </TabsContent>
+            <TabsContent value="adjust" className="mt-4">
+              {products.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Add products first before recording adjustments.
+                </p>
+              ) : (
+                <AdjustmentForm products={products} inventoryStatus={inventoryStatus} />
+              )}
             </TabsContent>
           </Tabs>
         </div>
