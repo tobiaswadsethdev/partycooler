@@ -219,7 +219,7 @@ export function TransactionHistory({ transactions, currentUserId }: TransactionH
                 )}
               </div>
             </div>
-          )})}
+          )})
         )}
       </div>
 
