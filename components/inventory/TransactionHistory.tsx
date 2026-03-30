@@ -170,7 +170,7 @@ export function TransactionHistory({ transactions, currentUserId }: TransactionH
                     )}
                   </TableCell>
                 </TableRow>
-              )})}
+              )})
             )}
           </TableBody>
         </Table>
