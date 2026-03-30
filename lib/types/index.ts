@@ -20,8 +20,9 @@ export interface InventoryTransaction {
   id: string
   user_id: string
   product_id: string
-  transaction_type: 'ingress' | 'egress'
+  transaction_type: 'ingress' | 'egress' | 'adjustment'
   quantity: number
+  notes?: string | null
   transaction_date: string
   created_at: string
   product?: Product

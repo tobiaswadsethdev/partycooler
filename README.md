@@ -71,7 +71,7 @@ partycooler/
 │   ├── layout/                   # AppSidebar, Header, MobileNav, ThemeToggle
 │   ├── dashboard/                # KPI cards, charts, alert banner
 │   ├── products/                 # ProductsList, AddProductModal, EditProductModal, DeleteProductButton
-│   ├── inventory/                # TransactionForm, TransactionHistory, QuickActionsPanel, DeleteTransactionButton
+│   ├── inventory/                # TransactionForm, TransactionHistory, QuickActionsPanel, AdjustmentForm, DeleteTransactionButton
 │   ├── alerts/                   # AlertsList, AlertItem
 │   ├── activity/                 # ActivitySummaryCards, ActivityChart, ActivityLog
 │   └── settings/                 # ProfileForm
@@ -101,6 +101,7 @@ partycooler/
 | 7 | Polish & Optimization | ✅ Complete |
 | 8 | Settings & Dark Mode | ✅ Complete |
 | 9 | Delete Own Transactions | ✅ Complete |
+| 10 | Stock Diff Adjustment | ✅ Complete |
 
 ---
 
@@ -113,7 +114,7 @@ partycooler/
 | `/auth/sign-up` | User registration |
 | `/protected/dashboard` | KPI cards, charts, low-stock alerts |
 | `/protected/products` | Add, edit, delete products |
-| `/protected/inventory` | Record stock in/out, view transaction history |
+| `/protected/inventory` | Record stock in/out, adjust for discrepancies, view transaction history |
 | `/protected/alerts` | Low-stock alert management — active/resolved tabs, resolve all |
 | `/protected/activity` | Daily/weekly/monthly summaries, 30-day bar chart, transaction log |
 | `/protected/settings` | Profile management (display name) |

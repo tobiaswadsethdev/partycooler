@@ -79,6 +79,39 @@ export async function getTransactions(limit = 50): Promise<InventoryTransaction[
   return data ?? []
 }
 
+const adjustmentSchema = z.object({
+  product_id: z.string().uuid('Please select a product'),
+  quantity: z.coerce.number().int().min(1, 'Adjustment quantity must be at least 1'),
+  notes: z.string().min(1, 'A reason is required').max(500, 'Reason must be 500 characters or fewer'),
+})
+
+export type AdjustmentFormValues = z.infer<typeof adjustmentSchema>
+
+export async function createAdjustment(values: AdjustmentFormValues): Promise<ActionResult> {
+  const parsed = adjustmentSchema.safeParse(values)
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.errors[0].message }
+  }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Not authenticated' }
+
+  const { error } = await supabase.from('inventory_transactions').insert({
+    user_id: user.id,
+    product_id: parsed.data.product_id,
+    transaction_type: 'adjustment',
+    quantity: parsed.data.quantity,
+    notes: parsed.data.notes,
+  })
+
+  if (error) return { success: false, error: error.message }
+
+  revalidatePath('/protected/inventory')
+  revalidatePath('/protected/dashboard')
+  return { success: true }
+}
+
 export async function getInventoryStatus(): Promise<InventoryStatus[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
