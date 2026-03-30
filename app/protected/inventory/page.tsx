@@ -31,7 +31,7 @@ export default async function InventoryPage() {
         {/* Left: history + quick actions */}
         <div className="space-y-6 min-w-0">
           <Tabs defaultValue="history">
-            <TabsList>
+            <TabsList className="w-full overflow-x-auto justify-start">
               <TabsTrigger value="history">Transaction history</TabsTrigger>
               <TabsTrigger value="quick">Quick actions</TabsTrigger>
               <TabsTrigger value="adjust">Stock adjustment</TabsTrigger>
