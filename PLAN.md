@@ -372,6 +372,16 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 
 ---
 
+### Phase 11: Change Password
+
+**Goal:** Allow users to change their password from the settings page
+
+- [x] **11.1** Add `changePasswordSchema`, `ChangePasswordValues` type, and `changePassword` server action to `lib/actions/profile.ts` — verifies current password via `signInWithPassword` before calling `updateUser`
+- [x] **11.2** Create `components/settings/ChangePasswordForm.tsx` — three password fields (current, new, confirm), inline Zod validation, toast feedback, form resets on success
+- [x] **11.3** Update `app/protected/settings/page.tsx` — add "Password" card section below "Profile" card
+
+---
+
 ## Directory Structure
 
 ```
@@ -427,7 +437,8 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 │   │   ├── ActivityChart.tsx
 │   │   └── ActivityLog.tsx
 │   └── settings/
-│       └── ProfileForm.tsx
+│       ├── ProfileForm.tsx
+│       └── ChangePasswordForm.tsx
 │
 ├── app/
 │   ├── layout.tsx
