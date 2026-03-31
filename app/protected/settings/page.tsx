@@ -1,5 +1,6 @@
 import { getProfile } from '@/lib/actions/profile'
 import { ProfileForm } from '@/components/settings/ProfileForm'
+import { ChangePasswordForm } from '@/components/settings/ChangePasswordForm'
 
 export default async function SettingsPage() {
   const profile = await getProfile()
@@ -14,6 +15,11 @@ export default async function SettingsPage() {
       <div className="rounded-lg border bg-card p-6 space-y-4">
         <h2 className="font-semibold">Profile</h2>
         <ProfileForm defaultName={profile?.name ?? ''} email={profile?.email ?? ''} />
+      </div>
+
+      <div className="rounded-lg border bg-card p-6 space-y-4">
+        <h2 className="font-semibold">Password</h2>
+        <ChangePasswordForm />
       </div>
     </div>
   )
