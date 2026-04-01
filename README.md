@@ -49,6 +49,22 @@ This single file creates all tables, indexes, RLS policies, and triggers in the 
 
 > **Tip:** Disable email confirmation in Supabase Auth settings during development for faster testing.
 
+---
+
+## Troubleshooting
+
+### "relation inventory_transactions does not exist" when recording a transaction
+
+This is caused by a bug in the `update_inventory_status()` trigger function — it references tables without the `public.` schema prefix, which fails under Supabase's required `SET search_path = ''` security setting.
+
+To fix the live database, run this patch once in the Supabase SQL editor:
+
+```
+scripts/fix-inventory-trigger.sql
+```
+
+This replaces the trigger function with a corrected version that uses schema-qualified table references.
+
 ### 4. Start the dev server
 
 ```bash
