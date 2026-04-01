@@ -129,10 +129,10 @@ BEGIN
          ELSE 0 END
   ), 0)
   INTO new_quantity
-  FROM inventory_transactions
+  FROM public.inventory_transactions
   WHERE product_id = target_product_id;
 
-  INSERT INTO inventory_status (product_id, current_quantity, last_updated)
+  INSERT INTO public.inventory_status (product_id, current_quantity, last_updated)
   VALUES (target_product_id, new_quantity, NOW())
   ON CONFLICT (product_id) DO UPDATE
     SET current_quantity = new_quantity, last_updated = NOW();
