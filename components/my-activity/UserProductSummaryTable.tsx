@@ -174,9 +174,6 @@ export function UserProductSummaryTable({ summaries }: UserProductSummaryTablePr
                     <Badge variant="secondary" className="mt-1">{s.category}</Badge>
                   )}
                 </div>
-                <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
-                  {s.my_transaction_count} txn{s.my_transaction_count !== 1 ? 's' : ''}
-                </span>
               </div>
               <div className="flex items-center gap-4 text-sm">
                 <span className="flex items-center gap-1 text-[var(--color-success)] tabular-nums font-medium">
