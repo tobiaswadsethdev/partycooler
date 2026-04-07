@@ -11,6 +11,7 @@ import {
   LogOut,
   Thermometer,
   Settings,
+  UserCircle,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -30,6 +31,7 @@ const navItems = [
   { href: '/protected/inventory', label: 'Inventory', icon: ArrowDownUp },
   { href: '/protected/alerts', label: 'Alerts', icon: AlertTriangle },
   { href: '/protected/activity', label: 'Activity', icon: Activity },
+  { href: '/protected/my-activity', label: 'My Activity', icon: UserCircle },
 ]
 
 interface AppSidebarProps {
