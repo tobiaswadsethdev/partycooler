@@ -120,7 +120,7 @@ partycooler/
 | 9 | Delete Own Transactions | ✅ Complete |
 | 10 | Stock Diff Adjustment | ✅ Complete |
 | 11 | Change Password | ✅ Complete |
-| 12 | My Activity (per-user product summary) | ✅ Complete |
+| 12 | My contributions by product (on Activity page) | ✅ Complete |
 
 ---
 
@@ -135,8 +135,7 @@ partycooler/
 | `/protected/products` | Add, edit, delete products |
 | `/protected/inventory` | Record stock in/out, adjust for discrepancies, view transaction history |
 | `/protected/alerts` | Low-stock alert management — active/resolved tabs, resolve all |
-| `/protected/activity` | Daily/weekly/monthly summaries, 30-day bar chart, transaction log |
-| `/protected/my-activity` | Your personal ingress/egress totals per product |
+| `/protected/activity` | Daily/weekly/monthly summaries, 30-day bar chart, transaction log, per-product contributions |
 | `/protected/settings` | Profile management (display name, change password) |
 
 ---

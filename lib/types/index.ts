@@ -77,8 +77,9 @@ export interface UserProductSummary {
   product_id: string
   product_name: string
   category: string | null
-  total_ingress: number
-  total_egress: number
-  net_change: number
-  transaction_count: number
+  my_ingress: number
+  my_egress: number
+  my_net: number
+  my_transaction_count: number
+  all_total: number
 }

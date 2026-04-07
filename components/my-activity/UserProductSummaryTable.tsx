@@ -114,17 +114,17 @@ export function UserProductSummaryTable({ summaries }: UserProductSummaryTablePr
               <TableHead>
                 <span className="flex items-center gap-1">
                   <ArrowDownToLine className="h-3.5 w-3.5 text-[var(--color-success)]" />
-                  Stock In
+                  My stock in
                 </span>
               </TableHead>
               <TableHead>
                 <span className="flex items-center gap-1">
                   <ArrowUpFromLine className="h-3.5 w-3.5 text-destructive" />
-                  Stock Out
+                  My stock out
                 </span>
               </TableHead>
-              <TableHead>Net Change</TableHead>
-              <TableHead className="text-right">Transactions</TableHead>
+              <TableHead>My net</TableHead>
+              <TableHead className="text-right">All transactions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -146,16 +146,16 @@ export function UserProductSummaryTable({ summaries }: UserProductSummaryTablePr
                     )}
                   </TableCell>
                   <TableCell className="text-[var(--color-success)] tabular-nums font-medium">
-                    +{s.total_ingress}
+                    +{s.my_ingress}
                   </TableCell>
-                  <TableCell className="text-destructive tabular-nums font-medium">
-                    {s.total_egress > 0 ? s.total_egress : '—'}
+                  <TableCell className={cn('tabular-nums font-medium', s.my_egress > 0 ? 'text-destructive' : 'text-muted-foreground')}>
+                    {s.my_egress > 0 ? s.my_egress : '—'}
                   </TableCell>
                   <TableCell>
-                    <NetChangeCell value={s.net_change} />
+                    <NetChangeCell value={s.my_net} />
                   </TableCell>
                   <TableCell className="text-right tabular-nums text-muted-foreground">
-                    {s.transaction_count}
+                    {s.all_total}
                   </TableCell>
                 </TableRow>
               ))
@@ -179,23 +179,23 @@ export function UserProductSummaryTable({ summaries }: UserProductSummaryTablePr
                   )}
                 </div>
                 <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
-                  {s.transaction_count} txn{s.transaction_count !== 1 ? 's' : ''}
+                  {s.all_total} total
                 </span>
               </div>
               <div className="flex items-center gap-4 text-sm">
                 <span className="flex items-center gap-1 text-[var(--color-success)] tabular-nums font-medium">
                   <ArrowDownToLine className="h-3.5 w-3.5 shrink-0" />
-                  +{s.total_ingress}
+                  +{s.my_ingress}
                 </span>
                 <span className={cn(
                   'flex items-center gap-1 tabular-nums font-medium',
-                  s.total_egress > 0 ? 'text-destructive' : 'text-muted-foreground'
+                  s.my_egress > 0 ? 'text-destructive' : 'text-muted-foreground'
                 )}>
                   <ArrowUpFromLine className="h-3.5 w-3.5 shrink-0" />
-                  {s.total_egress > 0 ? s.total_egress : '0'}
+                  {s.my_egress > 0 ? s.my_egress : '0'}
                 </span>
                 <span className="text-muted-foreground">·</span>
-                <NetChangeCell value={s.net_change} />
+                <NetChangeCell value={s.my_net} />
               </div>
             </div>
           ))
