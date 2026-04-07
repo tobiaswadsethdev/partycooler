@@ -81,5 +81,4 @@ export interface UserProductSummary {
   my_egress: number
   my_net: number
   my_transaction_count: number
-  all_total: number
 }

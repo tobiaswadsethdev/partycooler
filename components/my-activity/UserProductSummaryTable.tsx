@@ -124,13 +124,12 @@ export function UserProductSummaryTable({ summaries }: UserProductSummaryTablePr
                 </span>
               </TableHead>
               <TableHead>My net</TableHead>
-              <TableHead className="text-right">All transactions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                   No products match your search.
                 </TableCell>
               </TableRow>
@@ -154,9 +153,6 @@ export function UserProductSummaryTable({ summaries }: UserProductSummaryTablePr
                   <TableCell>
                     <NetChangeCell value={s.my_net} />
                   </TableCell>
-                  <TableCell className="text-right tabular-nums text-muted-foreground">
-                    {s.all_total}
-                  </TableCell>
                 </TableRow>
               ))
             )}
@@ -179,7 +175,7 @@ export function UserProductSummaryTable({ summaries }: UserProductSummaryTablePr
                   )}
                 </div>
                 <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
-                  {s.all_total} total
+                  {s.my_transaction_count} txn{s.my_transaction_count !== 1 ? 's' : ''}
                 </span>
               </div>
               <div className="flex items-center gap-4 text-sm">

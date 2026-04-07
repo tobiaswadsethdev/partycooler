@@ -34,10 +34,7 @@ export default async function ActivityPage() {
       </div>
 
       <div>
-        <h3 className="text-base font-semibold mb-1">My contributions by product</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Your stock-in and stock-out per product, with total activity across all users.
-        </p>
+        <h3 className="text-base font-semibold mb-4">My activity summary</h3>
         <UserProductSummaryTable summaries={productSummaries} />
       </div>
     </div>
