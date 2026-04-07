@@ -90,6 +90,7 @@ partycooler/
 │   ├── inventory/                # TransactionForm, TransactionHistory, QuickActionsPanel, AdjustmentForm, DeleteTransactionButton
 │   ├── alerts/                   # AlertsList, AlertItem
 │   ├── activity/                 # ActivitySummaryCards, ActivityChart, ActivityLog
+│   ├── my-activity/              # UserProductSummaryTable
 │   └── settings/                 # ProfileForm, ChangePasswordForm
 ├── lib/
 │   ├── supabase/                 # Browser and server Supabase clients
@@ -119,6 +120,7 @@ partycooler/
 | 9 | Delete Own Transactions | ✅ Complete |
 | 10 | Stock Diff Adjustment | ✅ Complete |
 | 11 | Change Password | ✅ Complete |
+| 12 | My contributions by product (on Activity page) | ✅ Complete |
 
 ---
 
@@ -133,7 +135,7 @@ partycooler/
 | `/protected/products` | Add, edit, delete products |
 | `/protected/inventory` | Record stock in/out, adjust for discrepancies, view transaction history |
 | `/protected/alerts` | Low-stock alert management — active/resolved tabs, resolve all |
-| `/protected/activity` | Daily/weekly/monthly summaries, 30-day bar chart, transaction log |
+| `/protected/activity` | Daily/weekly/monthly summaries, 30-day bar chart, transaction log, per-product contributions |
 | `/protected/settings` | Profile management (display name, change password) |
 
 ---

@@ -372,6 +372,20 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 
 ---
 
+### Phase 12: My Activity — Per-User Product Traffic Summary
+
+**Goal:** Let each user see their own total ingress and egress per product, independent of other users' contributions.
+
+- [x] **12.1** Add `UserProductSummary` interface to `lib/types/index.ts`
+- [x] **12.2** Create `lib/actions/user-summary.ts` — `getUserProductSummaries()` server action that fetches the current user's transactions joined with products, aggregates client-side, and sorts by total volume descending
+- [x] **12.3** Create `components/my-activity/UserProductSummaryTable.tsx` — searchable table (desktop) + card list (mobile) with ingress (green), egress (red), net change (colored), and transaction count columns; "Show more" pagination at 20/page
+- [x] **12.4** Add "My contributions by product" section to `/protected/activity/page.tsx` — calls both `getActivityData` and `getUserProductSummaries` in parallel; table renders below the transaction log
+- [x] **12.5** Added `all_total` field (global ingress + egress across all users) to `UserProductSummary` so each row shows both personal and team-wide totals for the product
+
+**Note:** Adjustments are counted in `my_transaction_count` but excluded from directional ingress/egress totals. The separate `/protected/my-activity` route was removed — the summary lives on the Activity page.
+
+---
+
 ### Phase 11: Change Password
 
 **Goal:** Allow users to change their password from the settings page
@@ -563,7 +577,7 @@ export interface ActivitySummary {
 | `/protected/products` | Products | Product catalog management |
 | `/protected/inventory` | Inventory | Record transactions, view history |
 | `/protected/alerts` | Alerts | Low stock alerts management |
-| `/protected/activity` | Activity | Historical summaries and logs |
+| `/protected/activity` | Activity | Historical summaries, logs, and per-product contributions |
 | `/protected/settings` | Settings | Profile name management |
 
 ---

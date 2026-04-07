@@ -72,3 +72,13 @@ export interface ActivitySummary {
   netChange: number
   transactionCount: number
 }
+
+export interface UserProductSummary {
+  product_id: string
+  product_name: string
+  category: string | null
+  my_ingress: number
+  my_egress: number
+  my_net: number
+  my_transaction_count: number
+}
