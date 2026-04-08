@@ -138,7 +138,9 @@ export function ActivityLog({ logs }: ActivityLogProps) {
                       {notes && <span className="ml-2">{notes}</span>}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {log.profile?.name ?? log.profile?.email ?? '—'}
+                      {(log.details as Record<string, unknown>)?.paid_by_pant
+                        ? 'Pant'
+                        : (log.profile?.name ?? log.profile?.email ?? '—')}
                     </TableCell>
                     <TableCell className="text-right text-sm text-muted-foreground tabular-nums">
                       {format(new Date(log.created_at), 'MMM d, HH:mm')}
@@ -178,9 +180,10 @@ export function ActivityLog({ logs }: ActivityLogProps) {
                   {notes && <p className="text-sm text-muted-foreground truncate">{notes}</p>}
                   <p className="text-xs text-muted-foreground mt-1">
                     {format(new Date(log.created_at), 'MMM d, yyyy HH:mm')}
-                    {log.profile && (
-                      <> · {log.profile.name ?? log.profile.email}</>
-                    )}
+                    {(log.details as Record<string, unknown>)?.paid_by_pant
+                      ? <> · Pant</>
+                      : log.profile && <> · {log.profile.name ?? log.profile.email}</>
+                    }
                   </p>
                 </div>
               </div>

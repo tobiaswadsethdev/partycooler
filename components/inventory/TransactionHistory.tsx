@@ -159,7 +159,7 @@ export function TransactionHistory({ transactions, currentUserId }: TransactionH
                     {meta.sign}{t.quantity}
                   </TableCell>
                   <TableCell className="text-right text-sm text-muted-foreground">
-                    {t.profile?.name ?? t.profile?.email ?? '—'}
+                    {t.paid_by_pant ? 'Pant' : (t.profile?.name ?? t.profile?.email ?? '—')}
                   </TableCell>
                   <TableCell className="text-right text-sm text-muted-foreground tabular-nums">
                     {format(new Date(t.transaction_date), 'MMM d, HH:mm')}
@@ -210,9 +210,10 @@ export function TransactionHistory({ transactions, currentUserId }: TransactionH
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   {format(new Date(t.transaction_date), 'MMM d, yyyy HH:mm')}
-                  {t.profile && (
-                    <> · {t.profile.name ?? t.profile.email}</>
-                  )}
+                  {t.paid_by_pant
+                    ? <> · Pant</>
+                    : t.profile && <> · {t.profile.name ?? t.profile.email}</>
+                  }
                 </p>
                 {t.notes && (
                   <p className="text-xs text-muted-foreground italic mt-0.5">{t.notes}</p>

@@ -87,6 +87,7 @@ CREATE TABLE inventory_transactions (
   product_id       UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   transaction_type TEXT CHECK (transaction_type IN ('ingress', 'egress')),
   quantity         INTEGER NOT NULL CHECK (quantity > 0),
+  paid_by_pant     BOOLEAN NOT NULL DEFAULT FALSE,
   transaction_date TIMESTAMP DEFAULT NOW(),
   created_at       TIMESTAMP DEFAULT NOW()
 );
@@ -233,7 +234,8 @@ BEGIN
     jsonb_build_object(
       'product_id',       NEW.product_id,
       'quantity',         NEW.quantity,
-      'transaction_type', NEW.transaction_type
+      'transaction_type', NEW.transaction_type,
+      'paid_by_pant',     NEW.paid_by_pant
     )
   );
   RETURN NEW;

@@ -23,6 +23,7 @@ export interface InventoryTransaction {
   transaction_type: 'ingress' | 'egress' | 'adjustment'
   quantity: number
   notes?: string | null
+  paid_by_pant?: boolean
   transaction_date: string
   created_at: string
   product?: Product
