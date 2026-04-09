@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { toast } from 'sonner'
 import { ArrowDownToLine, ArrowUpFromLine } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import {
   Form,
@@ -30,6 +31,7 @@ const schema = z.object({
   product_id: z.string().uuid('Please select a product'),
   transaction_type: z.enum(['ingress', 'egress']),
   quantity: z.coerce.number().int().min(1, 'Quantity must be at least 1'),
+  paid_by_pant: z.boolean().default(false),
 })
 
 interface TransactionFormProps {
@@ -51,6 +53,7 @@ export function TransactionForm({
       product_id: defaultProductId ?? '',
       transaction_type: defaultType,
       quantity: 1,
+      paid_by_pant: false,
     },
   })
 
@@ -100,7 +103,7 @@ export function TransactionForm({
                   </button>
                   <button
                     type="button"
-                    onClick={() => field.onChange('egress')}
+                    onClick={() => { field.onChange('egress'); form.setValue('paid_by_pant', false) }}
                     className={cn(
                       'flex items-center justify-center gap-2 rounded-md border px-4 py-3 text-sm font-medium transition-colors',
                       field.value === 'egress'
@@ -159,6 +162,22 @@ export function TransactionForm({
             </FormItem>
           )}
         />
+
+        {/* Pant — only for stock in */}
+        {transactionType === 'ingress' && (
+          <FormField
+            control={form.control}
+            name="paid_by_pant"
+            render={({ field }) => (
+              <FormItem className="flex items-center gap-2 space-y-0">
+                <FormControl>
+                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                </FormControl>
+                <FormLabel className="font-normal cursor-pointer">Paid by Pant</FormLabel>
+              </FormItem>
+            )}
+          />
+        )}
 
         <Button
           type="submit"

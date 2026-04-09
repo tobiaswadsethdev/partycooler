@@ -386,6 +386,20 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 
 ---
 
+### Phase 13: Pant Payment Attribution
+
+**Goal:** Allow stock-in transactions to be attributed to Pant (the Swedish bottle recycling deposit system) instead of the recording user.
+
+- [x] **13.1** Create `scripts/migrations/add_pant_payment.sql` — `ALTER TABLE inventory_transactions ADD COLUMN paid_by_pant BOOLEAN NOT NULL DEFAULT FALSE`; update `log_inventory_transaction()` trigger to include `paid_by_pant` in `activity_logs.details` JSONB
+- [x] **13.2** Update `scripts/schema.sql` — add `paid_by_pant` column to `inventory_transactions` definition; update trigger function body to match
+- [x] **13.3** Update `lib/types/index.ts` — add `paid_by_pant?: boolean` to `InventoryTransaction` interface
+- [x] **13.4** Update `lib/actions/transactions.ts` — add `paid_by_pant` to `transactionSchema` (optional boolean, default false) and pass it in the DB insert
+- [x] **13.5** Update `components/inventory/TransactionForm.tsx` — add `paid_by_pant` to local Zod schema and `defaultValues`; render a "Paid by Pant" checkbox only when `transaction_type === 'ingress'`; reset flag to false when switching to egress
+- [x] **13.6** Update `components/inventory/TransactionHistory.tsx` — show "Pant" in the "By" column (desktop table + mobile card) when `paid_by_pant` is true
+- [x] **13.7** Update `components/activity/ActivityLog.tsx` — show "Pant" in the "By" column (desktop table + mobile card) when `details.paid_by_pant` is true
+
+---
+
 ### Phase 11: Change Password
 
 **Goal:** Allow users to change their password from the settings page
@@ -402,7 +416,9 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 /vercel/share/v0-project/
 ├── scripts/
 │   ├── schema.sql                    # Full baseline schema (all tables, triggers, RLS)
-│   └── migration-add-adjustment.sql  # Phase 10: adds notes column + adjustment transaction type
+│   ├── migration-add-adjustment.sql  # Phase 10: adds notes column + adjustment transaction type
+│   └── migrations/
+│       └── add_pant_payment.sql      # Phase 13: adds paid_by_pant column + updates trigger
 │
 ├── lib/
 │   ├── supabase/

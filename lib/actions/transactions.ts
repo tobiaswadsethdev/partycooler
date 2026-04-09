@@ -9,6 +9,7 @@ const transactionSchema = z.object({
   product_id: z.string().uuid('Please select a product'),
   transaction_type: z.enum(['ingress', 'egress']),
   quantity: z.coerce.number().int().min(1, 'Quantity must be at least 1'),
+  paid_by_pant: z.boolean().optional().default(false),
 })
 
 export type TransactionFormValues = z.infer<typeof transactionSchema>
@@ -32,6 +33,7 @@ export async function createTransaction(values: TransactionFormValues): Promise<
     product_id: parsed.data.product_id,
     transaction_type: parsed.data.transaction_type,
     quantity: parsed.data.quantity,
+    paid_by_pant: parsed.data.paid_by_pant ?? false,
   })
 
   if (error) return { success: false, error: error.message }

@@ -121,6 +121,7 @@ partycooler/
 | 10 | Stock Diff Adjustment | ✅ Complete |
 | 11 | Change Password | ✅ Complete |
 | 12 | My contributions by product (on Activity page) | ✅ Complete |
+| 13 | Pant payment attribution for stock-in | ✅ Complete |
 
 ---
 
