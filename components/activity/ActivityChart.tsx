@@ -60,7 +60,7 @@ export function ActivityChart({ data }: ActivityChartProps) {
             </EmptyHeader>
           </Empty>
         ) : (
-          <ChartContainer config={chartConfig} className="min-h-[220px] w-full">
+          <ChartContainer config={chartConfig} className="min-h-[200px] w-full sm:aspect-auto sm:h-[180px] md:h-[220px]">
             <BarChart data={data} margin={{ left: 0, right: 8, top: 4, bottom: 0 }}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis

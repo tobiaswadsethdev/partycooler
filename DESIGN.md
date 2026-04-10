@@ -318,6 +318,7 @@ Labels:
 Sizing:
 - Minimum height: 200px
 - Aspect ratio: 16:9 for line/area, flexible for bars
+- Desktop cap: 280px fixed height on md+ breakpoints (overrides aspect-video to prevent full-viewport charts)
 ```
 
 ---
