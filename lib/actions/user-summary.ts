@@ -12,6 +12,7 @@ export async function getUserProductSummaries(): Promise<UserProductSummary[]> {
     .from('inventory_transactions')
     .select('product_id, transaction_type, quantity, product:products(id, name, category)')
     .eq('user_id', user.id)
+    .eq('paid_by_pant', false)
 
   if (error || !data) return []
 

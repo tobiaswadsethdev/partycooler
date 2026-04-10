@@ -33,6 +33,7 @@ async function summarisePeriod(
     .from('inventory_transactions')
     .select('transaction_type, quantity')
     .gte('transaction_date', since.toISOString())
+    .eq('paid_by_pant', false)
 
   if (!data || data.length === 0) return emptyPeriod(period)
 
@@ -87,6 +88,7 @@ export async function getActivityData(): Promise<ActivityData> {
     .from('inventory_transactions')
     .select('transaction_type, quantity, transaction_date')
     .gte('transaction_date', thirtyDaysAgo.toISOString())
+    .eq('paid_by_pant', false)
     .order('transaction_date', { ascending: true })
 
   // Build a map of YYYY-MM-DD (UTC) → totals
@@ -116,7 +118,9 @@ export async function getActivityData(): Promise<ActivityData> {
   })
 
   return {
-    logs: logsResult.data ?? [],
+    logs: (logsResult.data ?? []).filter(
+      (log) => !(log.details as Record<string, unknown>)?.paid_by_pant
+    ),
     summaries: { daily, weekly, monthly },
     chartData,
   }
