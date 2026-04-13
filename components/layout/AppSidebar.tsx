@@ -3,9 +3,9 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
+  Home,
   LayoutDashboard,
   Package,
-  ArrowDownUp,
   AlertTriangle,
   Activity,
   LogOut,
@@ -25,9 +25,9 @@ import {
 import { cn } from '@/lib/utils'
 
 const navItems = [
+  { href: '/protected/home', label: 'Home', icon: Home },
   { href: '/protected/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/protected/products', label: 'Products', icon: Package },
-  { href: '/protected/inventory', label: 'Inventory', icon: ArrowDownUp },
   { href: '/protected/alerts', label: 'Alerts', icon: AlertTriangle },
   { href: '/protected/activity', label: 'Activity', icon: Activity },
 ]
@@ -53,7 +53,7 @@ export function AppSidebar({ name, email }: AppSidebarProps) {
   return (
     <Sidebar>
       <SidebarHeader className="border-b px-4 py-4">
-        <Link href="/protected/dashboard" className="flex items-center gap-2">
+        <Link href="/protected/home" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <Thermometer className="h-4 w-4" />
           </div>

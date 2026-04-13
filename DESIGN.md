@@ -237,10 +237,9 @@ Styling:
 ┌──────────────────┐
 │ [Logo] Partycool │
 ├──────────────────┤
-│ Dashboard        │  <- Active state: bg-primary/10, text-primary
+│ Home             │  <- Active state: bg-primary/10, text-primary
+│ Dashboard        │
 │ Products         │
-│ Inventory        │
-│ Transactions     │
 │ Alerts           │
 │ Activity         │
 ├──────────────────┤

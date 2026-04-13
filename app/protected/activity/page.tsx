@@ -1,14 +1,14 @@
 import { getActivityData } from '@/lib/actions/activity'
-import { getUserProductSummaries } from '@/lib/actions/user-summary'
+import { getUserProductMatrix } from '@/lib/actions/user-summary'
 import { ActivitySummaryCards } from '@/components/activity/ActivitySummaryCards'
 import { ActivityChart } from '@/components/activity/ActivityChart'
 import { ActivityLog } from '@/components/activity/ActivityLog'
-import { UserProductSummaryTable } from '@/components/my-activity/UserProductSummaryTable'
+import { UserProductMatrix } from '@/components/activity/UserProductMatrix'
 
 export default async function ActivityPage() {
-  const [{ logs, summaries, chartData }, productSummaries] = await Promise.all([
+  const [{ logs, summaries, chartData }, matrix] = await Promise.all([
     getActivityData(),
-    getUserProductSummaries(),
+    getUserProductMatrix(),
   ])
 
   return (
@@ -34,8 +34,8 @@ export default async function ActivityPage() {
       </div>
 
       <div>
-        <h3 className="text-base font-semibold mb-4">My activity summary</h3>
-        <UserProductSummaryTable summaries={productSummaries} />
+        <h3 className="text-base font-semibold mb-4">Team activity overview</h3>
+        <UserProductMatrix data={matrix} />
       </div>
     </div>
   )

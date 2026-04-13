@@ -400,6 +400,25 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 
 ---
 
+### Phase 14: Homepage/Dashboard Redesign
+
+**Goal:** Consolidate the transaction form and personal activity summary into a dedicated Home page; add a team activity cross-table on the Activity page; improve the transaction form UX.
+
+- [x] **14.1** Create `/protected/home/page.tsx` — new landing page with TransactionForm (sticky right), ProductStockList (left), and UserProductSummaryTable (below left)
+- [x] **14.2** Create `components/dashboard/ProductStockList.tsx` — table of all products with current stock, low-stock badges, mobile card view
+- [x] **14.3** Update `components/inventory/TransactionForm.tsx` — accept `inventoryStatus` prop; show quantity in product dropdown; disable/grey out 0-stock items on egress; add "Stock adjustment" checkbox for egress (submits as `adjustment` type); keep "Paid by Pant" checkbox ingress-only
+- [x] **14.4** Update `lib/actions/transactions.ts` — extend `transaction_type` enum to include `'adjustment'`; update `revalidatePath` calls to `/protected/home` and `/protected/activity`
+- [x] **14.5** Add `getUserProductMatrix()` to `lib/actions/user-summary.ts` — aggregates net per user×product across all non-pant, non-adjustment transactions; returns users, products, and nets map
+- [x] **14.6** Create `components/activity/UserProductMatrix.tsx` — horizontally-scrollable cross-table with frozen user column, colour-coded net cells, and row totals
+- [x] **14.7** Update `/protected/activity/page.tsx` — remove UserProductSummaryTable; add UserProductMatrix "Team activity overview" section
+- [x] **14.8** Update `components/layout/AppSidebar.tsx` — add Home nav item (first), remove Inventory nav item, update logo link to `/protected/home`
+- [x] **14.9** Update `app/page.tsx` — redirect authenticated users to `/protected/home`
+- [x] **14.10** Delete orphaned files: `app/protected/inventory/`, `components/inventory/AdjustmentForm.tsx`, `components/inventory/QuickActionsPanel.tsx`, `components/inventory/TransactionHistory.tsx`, `components/my-activity/UserProductSummaryTable.tsx`
+
+**Note:** The existing Dashboard page (`/protected/dashboard`) is unchanged. The stock adjustment functionality previously on the dedicated Inventory page is now accessible via the "Stock adjustment" checkbox in the transaction form on the Home page.
+
+---
+
 ### Phase 11: Change Password
 
 **Goal:** Allow users to change their password from the settings page
@@ -589,11 +608,11 @@ export interface ActivitySummary {
 | `/` | Landing | Redirect to dashboard or login |
 | `/auth/login` | Login | Email/password login |
 | `/auth/sign-up` | Sign Up | User registration |
+| `/protected/home` | Home | Record transactions, current stock list, my activity summary |
 | `/protected/dashboard` | Dashboard | Main overview with charts |
 | `/protected/products` | Products | Product catalog management |
-| `/protected/inventory` | Inventory | Record transactions, view history |
 | `/protected/alerts` | Alerts | Low stock alerts management |
-| `/protected/activity` | Activity | Historical summaries, logs, and per-product contributions |
+| `/protected/activity` | Activity | Historical summaries, logs, and team activity cross-table |
 | `/protected/settings` | Settings | Profile name management |
 
 ---
