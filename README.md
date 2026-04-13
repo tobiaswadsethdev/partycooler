@@ -85,12 +85,11 @@ partycooler/
 ├── components/
 │   ├── ui/                       # shadcn/ui primitives (57 components)
 │   ├── layout/                   # AppSidebar, Header, MobileNav, ThemeToggle
-│   ├── dashboard/                # KPI cards, charts, alert banner
+│   ├── dashboard/                # KPI cards, charts, alert banner, ProductStockList
 │   ├── products/                 # ProductsList, AddProductModal, EditProductModal, DeleteProductButton
-│   ├── inventory/                # TransactionForm, TransactionHistory, QuickActionsPanel, AdjustmentForm, DeleteTransactionButton
+│   ├── inventory/                # TransactionForm, DeleteTransactionButton
 │   ├── alerts/                   # AlertsList, AlertItem
-│   ├── activity/                 # ActivitySummaryCards, ActivityChart, ActivityLog
-│   ├── my-activity/              # UserProductSummaryTable
+│   ├── activity/                 # ActivitySummaryCards, ActivityChart, ActivityLog, UserProductMatrix
 │   └── settings/                 # ProfileForm, ChangePasswordForm
 ├── lib/
 │   ├── supabase/                 # Browser and server Supabase clients
@@ -122,6 +121,7 @@ partycooler/
 | 11 | Change Password | ✅ Complete |
 | 12 | My contributions by product (on Activity page) | ✅ Complete |
 | 13 | Pant payment attribution for stock-in | ✅ Complete |
+| 14 | Homepage/Dashboard redesign | ✅ Complete |
 
 ---
 
@@ -129,14 +129,14 @@ partycooler/
 
 | Route | Description |
 |-------|-------------|
-| `/` | Redirects to dashboard or login |
+| `/` | Redirects to home or login |
 | `/auth/login` | Email/password sign-in |
 | `/auth/sign-up` | User registration |
+| `/protected/home` | Record stock in/out, current stock list, my activity summary |
 | `/protected/dashboard` | KPI cards, charts, low-stock alerts |
 | `/protected/products` | Add, edit, delete products |
-| `/protected/inventory` | Record stock in/out, adjust for discrepancies, view transaction history |
 | `/protected/alerts` | Low-stock alert management — active/resolved tabs, resolve all |
-| `/protected/activity` | Daily/weekly/monthly summaries, 30-day bar chart, transaction log, per-product contributions |
+| `/protected/activity` | Daily/weekly/monthly summaries, 30-day bar chart, transaction log, team activity cross-table |
 | `/protected/settings` | Profile management (display name, change password) |
 
 ---

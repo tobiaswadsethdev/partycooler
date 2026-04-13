@@ -24,18 +24,22 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-import { createTransaction, type TransactionFormValues } from '@/lib/actions/transactions'
-import type { Product } from '@/lib/types'
+import { createTransaction } from '@/lib/actions/transactions'
+import type { Product, InventoryStatus } from '@/lib/types'
 
 const schema = z.object({
   product_id: z.string().uuid('Please select a product'),
   transaction_type: z.enum(['ingress', 'egress']),
   quantity: z.coerce.number().int().min(1, 'Quantity must be at least 1'),
   paid_by_pant: z.boolean().default(false),
+  is_adjustment: z.boolean().default(false),
 })
+
+type FormValues = z.infer<typeof schema>
 
 interface TransactionFormProps {
   products: Product[]
+  inventoryStatus?: InventoryStatus[]
   defaultProductId?: string
   defaultType?: 'ingress' | 'egress'
   onSuccess?: () => void
@@ -43,32 +47,52 @@ interface TransactionFormProps {
 
 export function TransactionForm({
   products,
+  inventoryStatus = [],
   defaultProductId,
   defaultType = 'egress',
   onSuccess,
 }: TransactionFormProps) {
-  const form = useForm<TransactionFormValues>({
+  const qtyMap = new Map(inventoryStatus.map((s) => [s.product_id, s.current_quantity]))
+
+  const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       product_id: defaultProductId ?? '',
       transaction_type: defaultType,
       quantity: 1,
       paid_by_pant: false,
+      is_adjustment: false,
     },
   })
 
   const transactionType = form.watch('transaction_type')
+  const isAdjustment = form.watch('is_adjustment')
 
-  async function onSubmit(values: TransactionFormValues) {
-    const result = await createTransaction(values)
+  async function onSubmit(values: FormValues) {
+    const transactionTypeToSubmit =
+      values.transaction_type === 'egress' && values.is_adjustment ? 'adjustment' : values.transaction_type
+
+    const result = await createTransaction({
+      product_id: values.product_id,
+      transaction_type: transactionTypeToSubmit,
+      quantity: values.quantity,
+      paid_by_pant: values.paid_by_pant,
+    })
+
     if (result.success) {
       toast.success(
-        transactionType === 'ingress' ? 'Stock added successfully' : 'Stock removed successfully'
+        transactionTypeToSubmit === 'ingress'
+          ? 'Stock added successfully'
+          : transactionTypeToSubmit === 'adjustment'
+          ? 'Stock adjustment recorded'
+          : 'Stock removed successfully'
       )
       form.reset({
         product_id: values.product_id,
         transaction_type: values.transaction_type,
         quantity: 1,
+        paid_by_pant: false,
+        is_adjustment: false,
       })
       onSuccess?.()
     } else {
@@ -90,7 +114,7 @@ export function TransactionForm({
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
-                    onClick={() => field.onChange('ingress')}
+                    onClick={() => { field.onChange('ingress'); form.setValue('is_adjustment', false) }}
                     className={cn(
                       'flex items-center justify-center gap-2 rounded-md border px-4 py-3 text-sm font-medium transition-colors',
                       field.value === 'ingress'
@@ -135,12 +159,22 @@ export function TransactionForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {products.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name}
-                      {p.category ? ` · ${p.category}` : ''}
-                    </SelectItem>
-                  ))}
+                  {products.map((p) => {
+                    const qty = qtyMap.get(p.id) ?? 0
+                    const isOutOfStock = transactionType === 'egress' && qty === 0
+                    return (
+                      <SelectItem
+                        key={p.id}
+                        value={p.id}
+                        disabled={isOutOfStock}
+                        className={cn(isOutOfStock && 'opacity-40 cursor-not-allowed')}
+                      >
+                        {p.name}
+                        {p.category ? ` · ${p.category}` : ''}
+                        {` (${qty})`}
+                      </SelectItem>
+                    )
+                  })}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -163,7 +197,7 @@ export function TransactionForm({
           )}
         />
 
-        {/* Pant — only for stock in */}
+        {/* Paid by Pant — only for stock in */}
         {transactionType === 'ingress' && (
           <FormField
             control={form.control}
@@ -179,6 +213,22 @@ export function TransactionForm({
           />
         )}
 
+        {/* Stock adjustment — only for stock out */}
+        {transactionType === 'egress' && (
+          <FormField
+            control={form.control}
+            name="is_adjustment"
+            render={({ field }) => (
+              <FormItem className="flex items-center gap-2 space-y-0">
+                <FormControl>
+                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                </FormControl>
+                <FormLabel className="font-normal cursor-pointer">Stock adjustment</FormLabel>
+              </FormItem>
+            )}
+          />
+        )}
+
         <Button
           type="submit"
           className="w-full"
@@ -189,6 +239,8 @@ export function TransactionForm({
             ? 'Recording...'
             : transactionType === 'ingress'
             ? 'Record stock in'
+            : isAdjustment
+            ? 'Record adjustment'
             : 'Record stock out'}
         </Button>
       </form>

@@ -7,7 +7,7 @@ import type { InventoryTransaction, InventoryStatus } from '@/lib/types'
 
 const transactionSchema = z.object({
   product_id: z.string().uuid('Please select a product'),
-  transaction_type: z.enum(['ingress', 'egress']),
+  transaction_type: z.enum(['ingress', 'egress', 'adjustment']),
   quantity: z.coerce.number().int().min(1, 'Quantity must be at least 1'),
   paid_by_pant: z.boolean().optional().default(false),
 })
@@ -38,8 +38,9 @@ export async function createTransaction(values: TransactionFormValues): Promise<
 
   if (error) return { success: false, error: error.message }
 
-  revalidatePath('/protected/inventory')
+  revalidatePath('/protected/home')
   revalidatePath('/protected/dashboard')
+  revalidatePath('/protected/activity')
   return { success: true }
 }
 
@@ -64,8 +65,9 @@ export async function deleteTransaction(id: string): Promise<ActionResult> {
 
   if (error) return { success: false, error: error.message }
 
-  revalidatePath('/protected/inventory')
+  revalidatePath('/protected/home')
   revalidatePath('/protected/dashboard')
+  revalidatePath('/protected/activity')
   return { success: true }
 }
 
