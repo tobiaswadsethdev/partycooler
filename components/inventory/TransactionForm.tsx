@@ -118,8 +118,8 @@ export function TransactionForm({
                     className={cn(
                       'flex items-center justify-center gap-2 rounded-md border px-4 py-3 text-sm font-medium transition-colors',
                       field.value === 'ingress'
-                        ? 'border-[var(--success)] bg-[var(--success)]/10 text-[var(--success)]'
-                        : 'border-border text-muted-foreground hover:bg-muted'
+                        ? 'border-[var(--success)] bg-[var(--success)]/10 text-[var(--success)] hover:bg-[var(--success)]/20'
+                        : 'border-border text-muted-foreground hover:bg-muted hover:border-muted-foreground/40'
                     )}
                   >
                     <ArrowDownToLine className="h-4 w-4" />
@@ -131,8 +131,8 @@ export function TransactionForm({
                     className={cn(
                       'flex items-center justify-center gap-2 rounded-md border px-4 py-3 text-sm font-medium transition-colors',
                       field.value === 'egress'
-                        ? 'border-destructive bg-destructive/10 text-destructive'
-                        : 'border-border text-muted-foreground hover:bg-muted'
+                        ? 'border-destructive bg-destructive/10 text-destructive hover:bg-destructive/20'
+                        : 'border-border text-muted-foreground hover:bg-muted hover:border-muted-foreground/40'
                     )}
                   >
                     <ArrowUpFromLine className="h-4 w-4" />
@@ -231,7 +231,7 @@ export function TransactionForm({
 
         <Button
           type="submit"
-          className="w-full"
+          className="w-full cursor-pointer hover:brightness-90 hover:shadow-md"
           disabled={form.formState.isSubmitting}
           variant={transactionType === 'egress' ? 'destructive' : 'default'}
         >
