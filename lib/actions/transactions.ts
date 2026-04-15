@@ -83,6 +83,22 @@ export async function getTransactions(limit = 50): Promise<InventoryTransaction[
   return data ?? []
 }
 
+export async function getUserTransactions(limit = 50): Promise<InventoryTransaction[]> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { data, error } = await supabase
+    .from('inventory_transactions')
+    .select('*, product:products(id, name, category, reorder_threshold, created_at, updated_at, user_id), profile:profiles(name, email)')
+    .eq('user_id', user.id)
+    .order('transaction_date', { ascending: false })
+    .limit(limit)
+
+  if (error) return []
+  return data ?? []
+}
+
 const adjustmentSchema = z.object({
   product_id: z.string().uuid('Please select a product'),
   quantity: z.coerce.number().int().min(1, 'Adjustment quantity must be at least 1'),

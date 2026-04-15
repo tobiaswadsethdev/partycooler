@@ -19,7 +19,7 @@ import { deleteTransaction } from '@/lib/actions/transactions'
 
 interface DeleteTransactionButtonProps {
   id: string
-  productName: string
+  productName?: string
 }
 
 export function DeleteTransactionButton({ id, productName }: DeleteTransactionButtonProps) {
@@ -41,14 +41,16 @@ export function DeleteTransactionButton({ id, productName }: DeleteTransactionBu
       <AlertDialogTrigger asChild>
         <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive">
           <Trash2 className="h-3.5 w-3.5" />
-          <span className="sr-only">Delete transaction for {productName}</span>
+          <span className="sr-only">Delete transaction{productName ? ` for ${productName}` : ''}</span>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete transaction?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently remove this <strong>{productName}</strong> transaction and update inventory levels. This action cannot be undone.
+            {productName
+              ? <>This will permanently remove this <strong>{productName}</strong> transaction and update inventory levels. This action cannot be undone.</>
+              : <>This will permanently remove this transaction and update inventory levels. This action cannot be undone.</>}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

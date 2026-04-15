@@ -88,6 +88,7 @@ partycooler/
 │   ├── dashboard/                # KPI cards, charts, alert banner, ProductStockList
 │   ├── products/                 # ProductsList, AddProductModal, EditProductModal, DeleteProductButton
 │   ├── inventory/                # TransactionForm, DeleteTransactionButton
+│   ├── my-activity/              # UserProductSummaryTable, MyTransactionsList
 │   ├── alerts/                   # AlertsList, AlertItem
 │   ├── activity/                 # ActivitySummaryCards, ActivityChart, ActivityLog, UserProductMatrix
 │   └── settings/                 # ProfileForm, ChangePasswordForm
@@ -122,6 +123,7 @@ partycooler/
 | 12 | My contributions by product (on Activity page) | ✅ Complete |
 | 13 | Pant payment attribution for stock-in | ✅ Complete |
 | 14 | Homepage/Dashboard redesign | ✅ Complete |
+| 15 | My Transactions + Activity delete | ✅ Complete |
 
 ---
 
@@ -132,11 +134,11 @@ partycooler/
 | `/` | Redirects to home or login |
 | `/auth/login` | Email/password sign-in |
 | `/auth/sign-up` | User registration |
-| `/protected/home` | Record stock in/out, current stock list, my activity summary |
+| `/protected/home` | Record stock in/out, current stock list, my activity summary, my transactions (with delete) |
 | `/protected/dashboard` | KPI cards, charts, low-stock alerts |
 | `/protected/products` | Add, edit, delete products |
 | `/protected/alerts` | Low-stock alert management — active/resolved tabs, resolve all |
-| `/protected/activity` | Daily/weekly/monthly summaries, 30-day bar chart, transaction log, team activity cross-table |
+| `/protected/activity` | Daily/weekly/monthly summaries, 30-day bar chart, transaction log (delete own), team activity cross-table |
 | `/protected/settings` | Profile management (display name, change password) |
 
 ---
