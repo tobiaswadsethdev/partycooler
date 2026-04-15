@@ -429,6 +429,21 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 
 ---
 
+### Phase 15: My Transactions on Homepage + Delete on Activity Log
+
+**Goal:** Surface the logged-in user's own transactions on the Home page with delete buttons; add per-user delete buttons to the Activity page transaction log.
+
+- [x] **15.1** Make `productName` optional in `components/inventory/DeleteTransactionButton.tsx` — dialog description and SR-only label gracefully omit the product name when not provided
+- [x] **15.2** Add `getUserTransactions(limit = 50)` server action to `lib/actions/transactions.ts` — queries `inventory_transactions` filtered by `user.id` with the same product+profile join as `getTransactions`
+- [x] **15.3** Create `components/my-activity/MyTransactionsList.tsx` — searchable table (desktop) + card list (mobile) showing the current user's transactions with `DeleteTransactionButton` on every row; same pagination and badge patterns as `ActivityLog`
+- [x] **15.4** Update `app/protected/home/page.tsx` — add `getUserTransactions()` to `Promise.all`, import `MyTransactionsList`, render "My transactions" section below "My activity summary"
+- [x] **15.5** Update `components/activity/ActivityLog.tsx` — add optional `currentUserId` prop; show `DeleteTransactionButton` (using `entity_id` as transaction ID) on rows where `log.user_id === currentUserId`; empty `<TableCell>` placeholder on other rows keeps column alignment
+- [x] **15.6** Update `app/protected/activity/page.tsx` — call `createClient().auth.getUser()` at the top, pass `user?.id` as `currentUserId` to `ActivityLog`
+
+**Note:** The `activity_logs` trigger only fires on INSERT, so log rows persist after transaction deletion. If a user clicks delete on the Activity page after the transaction was already deleted elsewhere, `deleteTransaction` returns "Transaction not found" which shows as a toast error — acceptable behaviour.
+
+---
+
 ## Directory Structure
 
 ```

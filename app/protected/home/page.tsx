@@ -1,16 +1,18 @@
 import { getProducts } from '@/lib/actions/products'
-import { getInventoryStatus } from '@/lib/actions/transactions'
+import { getInventoryStatus, getUserTransactions } from '@/lib/actions/transactions'
 import { getUserProductSummaries } from '@/lib/actions/user-summary'
 import { TransactionForm } from '@/components/inventory/TransactionForm'
 import { ProductStockList } from '@/components/dashboard/ProductStockList'
 import { UserProductSummaryTable } from '@/components/my-activity/UserProductSummaryTable'
+import { MyTransactionsList } from '@/components/my-activity/MyTransactionsList'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default async function HomePage() {
-  const [products, inventoryStatus, productSummaries] = await Promise.all([
+  const [products, inventoryStatus, productSummaries, myTransactions] = await Promise.all([
     getProducts(),
     getInventoryStatus(),
     getUserProductSummaries(),
+    getUserTransactions(),
   ])
 
   return (
@@ -31,6 +33,11 @@ export default async function HomePage() {
           <div>
             <h3 className="text-base font-semibold mb-3">My activity summary</h3>
             <UserProductSummaryTable summaries={productSummaries} />
+          </div>
+
+          <div>
+            <h3 className="text-base font-semibold mb-3">My transactions</h3>
+            <MyTransactionsList transactions={myTransactions} />
           </div>
         </div>
 

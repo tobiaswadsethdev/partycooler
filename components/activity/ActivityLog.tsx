@@ -21,6 +21,7 @@ import {
   EmptyTitle,
   EmptyDescription,
 } from '@/components/ui/empty'
+import { DeleteTransactionButton } from '@/components/inventory/DeleteTransactionButton'
 import { cn } from '@/lib/utils'
 import type { ActivityLog as ActivityLogType } from '@/lib/types'
 
@@ -47,11 +48,12 @@ function getActionMeta(action: string) {
 
 interface ActivityLogProps {
   logs: ActivityLogType[]
+  currentUserId?: string
 }
 
 const PAGE_SIZE = 20
 
-export function ActivityLog({ logs }: ActivityLogProps) {
+export function ActivityLog({ logs, currentUserId }: ActivityLogProps) {
   const [search, setSearch] = useState('')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
@@ -103,12 +105,13 @@ export function ActivityLog({ logs }: ActivityLogProps) {
               <TableHead>Details</TableHead>
               <TableHead>By</TableHead>
               <TableHead className="text-right">Date</TableHead>
+              {currentUserId && <TableHead className="w-10" />}
             </TableRow>
           </TableHeader>
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={currentUserId ? 5 : 4} className="text-center text-muted-foreground py-8">
                   No activity matches your search.
                 </TableCell>
               </TableRow>
@@ -145,6 +148,13 @@ export function ActivityLog({ logs }: ActivityLogProps) {
                     <TableCell className="text-right text-sm text-muted-foreground tabular-nums">
                       {format(new Date(log.created_at), 'MMM d, HH:mm')}
                     </TableCell>
+                    {currentUserId && (
+                      <TableCell>
+                        {log.user_id === currentUserId && log.entity_id
+                          ? <DeleteTransactionButton id={log.entity_id} />
+                          : null}
+                      </TableCell>
+                    )}
                   </TableRow>
                 )
               })
@@ -186,6 +196,9 @@ export function ActivityLog({ logs }: ActivityLogProps) {
                     }
                   </p>
                 </div>
+                {currentUserId && log.user_id === currentUserId && log.entity_id && (
+                  <DeleteTransactionButton id={log.entity_id} />
+                )}
               </div>
             )
           })

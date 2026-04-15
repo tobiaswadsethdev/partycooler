@@ -1,3 +1,4 @@
+import { createClient } from '@/lib/supabase/server'
 import { getActivityData } from '@/lib/actions/activity'
 import { getUserProductMatrix } from '@/lib/actions/user-summary'
 import { ActivitySummaryCards } from '@/components/activity/ActivitySummaryCards'
@@ -6,6 +7,9 @@ import { ActivityLog } from '@/components/activity/ActivityLog'
 import { UserProductMatrix } from '@/components/activity/UserProductMatrix'
 
 export default async function ActivityPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
   const [{ logs, summaries, chartData }, matrix] = await Promise.all([
     getActivityData(),
     getUserProductMatrix(),
@@ -30,7 +34,7 @@ export default async function ActivityPage() {
 
       <div>
         <h3 className="text-base font-semibold mb-4">Transaction log</h3>
-        <ActivityLog logs={logs} />
+        <ActivityLog logs={logs} currentUserId={user?.id} />
       </div>
 
       <div>
