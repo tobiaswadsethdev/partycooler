@@ -11,7 +11,7 @@ A responsive web application for real-time inventory management of drinks and pr
 | **Database** | Supabase PostgreSQL |
 | **Device Model** | Single device per user |
 | **Authentication** | Simple email/password |
-| **Alerts** | Low stock alerts + Activity summaries |
+| **Alerts** | Removed — low stock count still shown on dashboard |
 
 ---
 
@@ -626,7 +626,6 @@ export interface ActivitySummary {
 | `/protected/home` | Home | Record transactions, current stock list, my activity summary |
 | `/protected/dashboard` | Dashboard | Main overview with charts |
 | `/protected/products` | Products | Product catalog management |
-| `/protected/alerts` | Alerts | Low stock alerts management |
 | `/protected/activity` | Activity | Historical summaries, logs, and team activity cross-table |
 | `/protected/settings` | Settings | Profile name management |
 

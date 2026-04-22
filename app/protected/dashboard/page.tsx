@@ -2,10 +2,9 @@ import { getDashboardData } from '@/lib/actions/dashboard'
 import { InventorySummaryCards } from '@/components/dashboard/InventorySummaryCards'
 import { InventoryStatusChart } from '@/components/dashboard/InventoryStatusChart'
 import { TransactionTrendChart } from '@/components/dashboard/TransactionTrendChart'
-import { AlertBanner } from '@/components/dashboard/AlertBanner'
 
 export default async function DashboardPage() {
-  const { stats, inventoryStatus, trendData, lowStockProducts } = await getDashboardData()
+  const { stats, inventoryStatus, trendData } = await getDashboardData()
 
   return (
     <div className="space-y-6">
@@ -13,8 +12,6 @@ export default async function DashboardPage() {
         <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
         <p className="text-muted-foreground">Your inventory at a glance</p>
       </div>
-
-      <AlertBanner lowStockProducts={lowStockProducts} />
 
       <InventorySummaryCards stats={stats} />
 

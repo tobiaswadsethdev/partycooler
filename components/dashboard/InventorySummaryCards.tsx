@@ -1,4 +1,4 @@
-import { Package, Boxes, AlertTriangle, ArrowLeftRight } from 'lucide-react'
+import { Package, Boxes, ArrowLeftRight, PackageSearch } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { DashboardStats } from '@/lib/types'
 
@@ -21,9 +21,9 @@ export function InventorySummaryCards({ stats }: InventorySummaryCardsProps) {
       description: 'across all products',
     },
     {
-      label: 'Low stock alerts',
+      label: 'Low stock products',
       value: stats.lowStockCount,
-      icon: AlertTriangle,
+      icon: PackageSearch,
       description: 'products need reorder',
       urgent: stats.lowStockCount > 0,
     },

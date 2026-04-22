@@ -9,7 +9,6 @@ const routeTitles: Record<string, string> = {
   '/protected/dashboard': 'Dashboard',
   '/protected/products': 'Products',
   '/protected/inventory': 'Inventory',
-  '/protected/alerts': 'Alerts',
   '/protected/activity': 'Activity',
   '/protected/settings': 'Settings',
 }
