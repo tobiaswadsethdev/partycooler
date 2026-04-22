@@ -85,11 +85,10 @@ partycooler/
 ├── components/
 │   ├── ui/                       # shadcn/ui primitives (57 components)
 │   ├── layout/                   # AppSidebar, Header, MobileNav, ThemeToggle
-│   ├── dashboard/                # KPI cards, charts, alert banner, ProductStockList
+│   ├── dashboard/                # KPI cards, charts, ProductStockList
 │   ├── products/                 # ProductsList, AddProductModal, EditProductModal, DeleteProductButton
 │   ├── inventory/                # TransactionForm, DeleteTransactionButton
 │   ├── my-activity/              # UserProductSummaryTable, MyTransactionsList
-│   ├── alerts/                   # AlertsList, AlertItem
 │   ├── activity/                 # ActivitySummaryCards, ActivityChart, ActivityLog, UserProductMatrix
 │   └── settings/                 # ProfileForm, ChangePasswordForm
 ├── lib/
@@ -113,7 +112,7 @@ partycooler/
 | 2 | Product Management (CRUD) | ✅ Complete |
 | 3 | Inventory Tracking | ✅ Complete |
 | 4 | Dashboard & Visualization | ✅ Complete |
-| 5 | Alerts System | ✅ Complete |
+| 5 | Alerts System | ❌ Removed |
 | 6 | Activity Summary | ✅ Complete |
 | 7 | Polish & Optimization | ✅ Complete |
 | 8 | Settings & Dark Mode | ✅ Complete |
@@ -135,9 +134,8 @@ partycooler/
 | `/auth/login` | Email/password sign-in |
 | `/auth/sign-up` | User registration |
 | `/protected/home` | Record stock in/out, current stock list, my activity summary, my transactions (with delete) |
-| `/protected/dashboard` | KPI cards, charts, low-stock alerts |
+| `/protected/dashboard` | KPI cards, charts, low-stock count |
 | `/protected/products` | Add, edit, delete products |
-| `/protected/alerts` | Low-stock alert management — active/resolved tabs, resolve all |
 | `/protected/activity` | Daily/weekly/monthly summaries, 30-day bar chart, transaction log (delete own), team activity cross-table |
 | `/protected/settings` | Profile management (display name, change password) |
 
@@ -146,7 +144,7 @@ partycooler/
 ## Key Design Decisions
 
 - **Single device per user** — all data is scoped by `user_id` with Supabase Row Level Security.
-- **Database-side calculations** — inventory totals and low-stock alerts are computed by PostgreSQL triggers, not application code.
+- **Database-side calculations** — inventory totals are computed by PostgreSQL triggers, not application code.
 - **Mobile-first** — sidebar on desktop, bottom navigation bar on mobile.
 - **Proxy convention** — Next.js 16 uses `proxy.ts` (not `middleware.ts`) with an exported `proxy` function.
 - **Dark mode** — system-aware theme switching via `next-themes`; toggle in the header persists preference to localStorage.

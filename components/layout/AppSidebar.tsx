@@ -6,7 +6,6 @@ import {
   Home,
   LayoutDashboard,
   Package,
-  AlertTriangle,
   Activity,
   LogOut,
   Thermometer,
@@ -28,7 +27,6 @@ const navItems = [
   { href: '/protected/home', label: 'Home', icon: Home },
   { href: '/protected/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/protected/products', label: 'Products', icon: Package },
-  { href: '/protected/alerts', label: 'Alerts', icon: AlertTriangle },
   { href: '/protected/activity', label: 'Activity', icon: Activity },
 ]
 

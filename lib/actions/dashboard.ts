@@ -21,7 +21,6 @@ export interface DashboardData {
   stats: DashboardStats
   inventoryStatus: InventoryStatusRow[]
   trendData: TrendDataPoint[]
-  lowStockProducts: InventoryStatusRow[]
 }
 
 export async function getDashboardData(): Promise<DashboardData> {
@@ -108,6 +107,5 @@ export async function getDashboardData(): Promise<DashboardData> {
     },
     inventoryStatus: inventoryStatus.sort((a, b) => b.current_quantity - a.current_quantity),
     trendData,
-    lowStockProducts,
   }
 }

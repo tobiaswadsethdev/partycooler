@@ -38,16 +38,6 @@ export interface InventoryStatus {
   product?: Product
 }
 
-export interface Alert {
-  id: string
-  product_id: string
-  alert_type: 'low_stock' | 'expiry_warning'
-  is_resolved: boolean
-  created_at: string
-  resolved_at: string | null
-  product?: Product
-}
-
 export interface ActivityLog {
   id: string
   user_id: string

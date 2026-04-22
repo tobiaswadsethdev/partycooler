@@ -2,14 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Package, Home, AlertTriangle, Activity } from 'lucide-react'
+import { LayoutDashboard, Package, Home, Activity } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
   { href: '/protected/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/protected/products', label: 'Products', icon: Package },
   { href: '/protected/home', label: 'Home', icon: Home, primary: true },
-  { href: '/protected/alerts', label: 'Alerts', icon: AlertTriangle },
   { href: '/protected/activity', label: 'Activity', icon: Activity },
 ]
 
