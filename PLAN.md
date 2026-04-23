@@ -444,6 +444,19 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 
 ---
 
+### Phase 16: Product Name in Global Activity Log
+
+**Goal:** Make each row in the Activity page's global transaction log self-describing by showing the product name alongside the quantity.
+
+- [x] **16.1** Add optional `product?: { id: string; name: string }` to `ActivityLog` interface in `lib/types/index.ts`
+- [x] **16.2** Update `getActivityData()` in `lib/actions/activity.ts` — collect distinct `product_id`s from `activity_logs.details` (JSONB, no FK), batch-fetch matching rows from `products`, and attach `product` to each log before returning
+- [x] **16.3** Update `components/activity/ActivityLog.tsx` — show product name as the primary line in the desktop Details cell (bold, qty/notes secondary); on mobile, promote product name to the card header with the action label as subtitle; fall back to current layout when `product` is missing (deleted/unavailable)
+- [x] **16.4** Extend the activity-log search filter to match on `product.name`
+
+**Note:** The activity log stores `product_id` inside the `details` JSONB, so Supabase's FK-based join can't be used — the product lookup is a second query keyed off the fetched logs. `products` RLS is permissive for authenticated users (`scripts/schema.sql:72`), so teammates' products resolve correctly.
+
+---
+
 ## Directory Structure
 
 ```

@@ -78,6 +78,32 @@ export async function getActivityData(): Promise<ActivityData> {
     summarisePeriod(supabase, monthAgo, 'monthly'),
   ])
 
+  // activity_logs.details->>'product_id' is JSONB and has no FK to products,
+  // so Supabase can't auto-resolve it — fetch the referenced products manually.
+  const logs = logsResult.data ?? []
+  const productIds = Array.from(
+    new Set(
+      logs
+        .map((l) => (l.details as Record<string, unknown> | null)?.product_id)
+        .filter((id): id is string => typeof id === 'string' && id.length > 0)
+    )
+  )
+
+  let productMap = new Map<string, { id: string; name: string }>()
+  if (productIds.length > 0) {
+    const { data: products } = await supabase
+      .from('products')
+      .select('id, name')
+      .in('id', productIds)
+    productMap = new Map((products ?? []).map((p) => [p.id, p]))
+  }
+
+  const enrichedLogs: ActivityLog[] = logs.map((log) => {
+    const pid = (log.details as Record<string, unknown> | null)?.product_id
+    const product = typeof pid === 'string' ? productMap.get(pid) : undefined
+    return product ? { ...log, product } : log
+  })
+
   // Build 30-day chart data from inventory_transactions
   const thirtyDaysAgo = new Date(now)
   thirtyDaysAgo.setUTCHours(0, 0, 0, 0)
@@ -116,7 +142,7 @@ export async function getActivityData(): Promise<ActivityData> {
   })
 
   return {
-    logs: logsResult.data ?? [],
+    logs: enrichedLogs,
     summaries: { daily, weekly, monthly },
     chartData,
   }
