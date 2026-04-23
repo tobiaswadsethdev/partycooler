@@ -457,6 +457,17 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 
 ---
 
+### Phase 17: Home as Default Post-Login Landing
+
+**Goal:** Make `/protected/home` the consistent landing page after authentication. Phase 14.9 already routed root-page hits to Home, but explicit login and the auth-page middleware kickout still sent users to `/protected/dashboard`.
+
+- [x] **17.1** Update `app/auth/login/page.tsx` — push to `/protected/home` after successful `signInWithPassword` (was `/protected/dashboard`)
+- [x] **17.2** Update `proxy.ts` — redirect authenticated users visiting `/auth/*` to `/protected/home` (was `/protected/dashboard`)
+
+**Note:** The Dashboard page itself (`/protected/dashboard`) and its sidebar/mobile-nav links are unchanged — it's still accessible, just no longer the default landing.
+
+---
+
 ## Directory Structure
 
 ```
