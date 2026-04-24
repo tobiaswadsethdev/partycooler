@@ -62,6 +62,7 @@ export function ActivityLog({ logs, currentUserId }: ActivityLogProps) {
     return (
       log.action.toLowerCase().includes(q) ||
       (log.entity_type ?? '').toLowerCase().includes(q) ||
+      (log.product?.name ?? '').toLowerCase().includes(q) ||
       JSON.stringify(log.details ?? '').toLowerCase().includes(q)
     )
   })
@@ -133,12 +134,17 @@ export function ActivityLog({ logs, currentUserId }: ActivityLogProps) {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {qty != null && (
-                        <span className="font-medium text-foreground tabular-nums">
-                          {log.action === 'stock_in' ? '+' : '-'}{String(qty)} units
-                        </span>
+                      {log.product?.name && (
+                        <div className="font-medium text-foreground">{log.product.name}</div>
                       )}
-                      {notes && <span className="ml-2">{notes}</span>}
+                      <div>
+                        {qty != null && (
+                          <span className="font-medium text-foreground tabular-nums">
+                            {log.action === 'stock_in' ? '+' : '-'}{String(qty)} units
+                          </span>
+                        )}
+                        {notes && <span className="ml-2">{notes}</span>}
+                      </div>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {(log.details as Record<string, unknown>)?.paid_by_pant
@@ -180,7 +186,14 @@ export function ActivityLog({ logs, currentUserId }: ActivityLogProps) {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-medium">{meta.label}</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">
+                        {log.product?.name ?? meta.label}
+                      </p>
+                      {log.product?.name && (
+                        <p className="text-xs text-muted-foreground">{meta.label}</p>
+                      )}
+                    </div>
                     {qty != null && (
                       <span className={cn('shrink-0 text-sm font-semibold tabular-nums', meta.color)}>
                         {log.action === 'stock_in' ? '+' : '-'}{String(qty)}

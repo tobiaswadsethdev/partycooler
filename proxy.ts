@@ -41,7 +41,7 @@ export async function proxy(request: NextRequest) {
   // Redirect authenticated users away from auth pages
   if (user && pathname.startsWith('/auth')) {
     const url = request.nextUrl.clone()
-    url.pathname = '/protected/dashboard'
+    url.pathname = '/protected/home'
     return NextResponse.redirect(url)
   }
 

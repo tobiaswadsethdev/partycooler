@@ -47,6 +47,7 @@ export interface ActivityLog {
   details: Record<string, unknown> | null
   created_at: string
   profile?: { name: string; email: string }
+  product?: { id: string; name: string }
 }
 
 export interface DashboardStats {
