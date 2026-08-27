@@ -80,7 +80,10 @@ Open [http://localhost:3000](http://localhost:3000) — you'll be redirected to 
 ```
 partycooler/
 ├── app/
+│   ├── api/mcp/                  # Remote MCP server endpoint (Streamable HTTP)
 │   ├── auth/                     # Login, sign-up, success, error pages
+│   ├── oauth/consent/            # OAuth 2.1 consent page (MCP authorization)
+│   ├── .well-known/              # OAuth protected resource metadata (RFC 9728)
 │   └── protected/                # Authenticated pages (dashboard, products, inventory, …)
 ├── components/
 │   ├── ui/                       # shadcn/ui primitives (57 components)
@@ -93,8 +96,8 @@ partycooler/
 │   └── settings/                 # ProfileForm, ChangePasswordForm
 ├── lib/
 │   ├── supabase/                 # Browser and server Supabase clients
-│   ├── actions/                  # Server Actions (products, transactions, dashboard)
 │   ├── actions/                  # Server Actions (products, transactions, dashboard, profile)
+│   ├── mcp/                      # MCP tool implementations (consume_drink, list_drinks)
 │   └── types/                    # TypeScript interfaces
 ├── scripts/                      # Database schema (schema.sql)
 ├── proxy.ts                      # Route protection (Next.js 16 proxy convention)
@@ -123,6 +126,7 @@ partycooler/
 | 13 | Pant payment attribution for stock-in | ✅ Complete |
 | 14 | Homepage/Dashboard redesign | ✅ Complete |
 | 15 | My Transactions + Activity delete | ✅ Complete |
+| 16 | MCP server for drink consumption | ✅ Complete |
 
 ---
 
@@ -131,8 +135,10 @@ partycooler/
 | Route | Description |
 |-------|-------------|
 | `/` | Redirects to home or login |
-| `/auth/login` | Email/password sign-in |
+| `/auth/login` | Email/password sign-in (supports `?next=` return path) |
 | `/auth/sign-up` | User registration |
+| `/oauth/consent` | OAuth 2.1 consent page for MCP clients |
+| `/api/mcp/mcp` | Remote MCP server endpoint (Streamable HTTP, OAuth-protected) |
 | `/protected/home` | Record stock in/out, current stock list, my activity summary, my transactions (with delete) |
 | `/protected/dashboard` | KPI cards, charts, low-stock count |
 | `/protected/products` | Add, edit, delete products |
@@ -148,6 +154,24 @@ partycooler/
 - **Mobile-first** — sidebar on desktop, bottom navigation bar on mobile.
 - **Proxy convention** — Next.js 16 uses `proxy.ts` (not `middleware.ts`) with an exported `proxy` function.
 - **Dark mode** — system-aware theme switching via `next-themes`; toggle in the header persists preference to localStorage.
+
+---
+
+## MCP Server
+
+The app hosts a remote [MCP](https://modelcontextprotocol.io) server at `/api/mcp/mcp` (Streamable HTTP), so AI assistants can record drink consumption. Nothing to install — users add the deployment URL as a connector in their MCP client and sign in with their existing Partycooler account.
+
+| Tool | Description |
+|------|-------------|
+| `consume_drink` | Record that a user consumed a drink (`drink`, optional `quantity`, optional `user` — defaults to the signed-in caller). Creates an `egress` transaction attributed to that user. |
+| `list_drinks` | List all drinks with current stock levels. |
+
+**Authentication** is OAuth 2.1 with Supabase Auth as the authorization server: the MCP client discovers it via the RFC 9728 metadata at `/.well-known/oauth-protected-resource`, registers itself dynamically, and sends the user through a browser sign-in + consent flow (`/oauth/consent`). Every request then carries the caller's own Supabase access token, so tools run under their identity and RLS.
+
+**One-time Supabase setup:**
+
+1. Enable the OAuth 2.1 server: Dashboard → Authentication → OAuth Server (or `[auth.oauth_server] enabled = true` in `config.toml`).
+2. Set the authorization URL path to `/oauth/consent` (the consent page ships with this app).
 
 ---
 
