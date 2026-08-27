@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -19,9 +19,15 @@ const loginSchema = z.object({
 
 type LoginValues = z.infer<typeof loginSchema>
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [serverError, setServerError] = useState<string | null>(null)
+
+  // Safe relative return path (used by the OAuth consent flow); reject
+  // absolute/protocol-relative URLs to avoid open redirects.
+  const next = searchParams.get('next')
+  const returnPath = next && next.startsWith('/') && !next.startsWith('//') ? next : '/protected/home'
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -41,7 +47,7 @@ export default function LoginPage() {
       return
     }
 
-    router.push('/protected/home')
+    router.push(returnPath)
     router.refresh()
   }
 
@@ -102,5 +108,13 @@ export default function LoginPage() {
         </p>
       </CardFooter>
     </Card>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   )
 }

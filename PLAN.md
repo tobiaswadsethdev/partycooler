@@ -468,16 +468,17 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 
 ---
 
-### Phase 18: MCP Server for Drink Consumption
+### Phase 18: Hosted MCP Server for Drink Consumption
 
-**Goal:** Let AI assistants record drink consumption via the Model Context Protocol.
+**Goal:** Let AI assistants record drink consumption via a central Model Context Protocol server hosted by the app itself — users connect by URL, nothing to install.
 
-- [x] **18.1** Add `mcp/server.ts` — stdio MCP server (`@modelcontextprotocol/sdk`) with `consume_drink` (user + drink + quantity → egress transaction) and `list_drinks` (products with current stock) tools
-- [x] **18.2** Authenticate via a dedicated bot account (`PARTYCOOLER_EMAIL` / `PARTYCOOLER_PASSWORD` env vars) — one Supabase session; `user_id` is attribution-only under RLS so the bot can record for any user
-- [x] **18.3** Add `mcp/README.md` — setup, client config example, and authentication model discussion
-- [x] **18.4** Add `npm run mcp` script (`tsx mcp/server.ts`)
+- [x] **18.1** Add `lib/mcp/tools.ts` — `consume_drink` (drink + optional quantity/user → egress transaction; user defaults to the caller) and `list_drinks` (products with current stock); names matched case-insensitively (exact first, then substring) with available options returned on miss
+- [x] **18.2** Add `app/api/mcp/[transport]/route.ts` — Streamable HTTP endpoint via `mcp-handler`, wrapped in `withMcpAuth`; bearer tokens are Supabase access tokens verified per request with `auth.getUser()`, and all tool DB access uses a client scoped to the caller's token (RLS as that user)
+- [x] **18.3** Add `app/.well-known/oauth-protected-resource/route.ts` — RFC 9728 metadata pointing MCP clients at Supabase Auth (`<supabase-url>/auth/v1`) as OAuth 2.1 authorization server
+- [x] **18.4** Add `app/oauth/consent/page.tsx` — consent page for Supabase's OAuth server (`getAuthorizationDetails` / `approveAuthorization` / `denyAuthorization`); redirects unauthenticated users to login and back
+- [x] **18.5** Support a safe relative `?next=` return path on `/auth/login` so the consent flow survives a login round-trip
 
-**Note:** User and drink names are matched case-insensitively in application code (exact first, then substring) against full table fetches — tables are small and this avoids `.or()` filter-injection quirks. If the server is ever exposed over HTTP, switch auth to OAuth 2.1 per the MCP spec instead of env credentials.
+**Note:** Requires enabling the OAuth 2.1 server in the Supabase dashboard (Authentication → OAuth Server) with authorization URL path `/oauth/consent`. MCP clients self-register via dynamic client registration; no per-user config or credentials. User/drink matching runs in application code against full table fetches — tables are small and this avoids `.or()` filter-injection quirks. `@modelcontextprotocol/sdk` is pinned to 1.26.0 (exact peer dependency of `mcp-handler` 1.x).
 
 ---
 

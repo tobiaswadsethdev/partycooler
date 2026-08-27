@@ -80,7 +80,10 @@ Open [http://localhost:3000](http://localhost:3000) — you'll be redirected to 
 ```
 partycooler/
 ├── app/
+│   ├── api/mcp/                  # Remote MCP server endpoint (Streamable HTTP)
 │   ├── auth/                     # Login, sign-up, success, error pages
+│   ├── oauth/consent/            # OAuth 2.1 consent page (MCP authorization)
+│   ├── .well-known/              # OAuth protected resource metadata (RFC 9728)
 │   └── protected/                # Authenticated pages (dashboard, products, inventory, …)
 ├── components/
 │   ├── ui/                       # shadcn/ui primitives (57 components)
@@ -93,10 +96,9 @@ partycooler/
 │   └── settings/                 # ProfileForm, ChangePasswordForm
 ├── lib/
 │   ├── supabase/                 # Browser and server Supabase clients
-│   ├── actions/                  # Server Actions (products, transactions, dashboard)
 │   ├── actions/                  # Server Actions (products, transactions, dashboard, profile)
+│   ├── mcp/                      # MCP tool implementations (consume_drink, list_drinks)
 │   └── types/                    # TypeScript interfaces
-├── mcp/                          # MCP server (consume_drink, list_drinks tools)
 ├── scripts/                      # Database schema (schema.sql)
 ├── proxy.ts                      # Route protection (Next.js 16 proxy convention)
 ├── PLAN.md                       # Implementation roadmap
@@ -133,8 +135,10 @@ partycooler/
 | Route | Description |
 |-------|-------------|
 | `/` | Redirects to home or login |
-| `/auth/login` | Email/password sign-in |
+| `/auth/login` | Email/password sign-in (supports `?next=` return path) |
 | `/auth/sign-up` | User registration |
+| `/oauth/consent` | OAuth 2.1 consent page for MCP clients |
+| `/api/mcp/mcp` | Remote MCP server endpoint (Streamable HTTP, OAuth-protected) |
 | `/protected/home` | Record stock in/out, current stock list, my activity summary, my transactions (with delete) |
 | `/protected/dashboard` | KPI cards, charts, low-stock count |
 | `/protected/products` | Add, edit, delete products |
@@ -155,7 +159,19 @@ partycooler/
 
 ## MCP Server
 
-An AI assistant can record drink consumption through the bundled [MCP](https://modelcontextprotocol.io) server (`consume_drink` and `list_drinks` tools). It runs over stdio via `npm run mcp` and signs in with a dedicated bot account. See [`mcp/README.md`](./mcp/README.md) for setup and the authentication model.
+The app hosts a remote [MCP](https://modelcontextprotocol.io) server at `/api/mcp/mcp` (Streamable HTTP), so AI assistants can record drink consumption. Nothing to install — users add the deployment URL as a connector in their MCP client and sign in with their existing Partycooler account.
+
+| Tool | Description |
+|------|-------------|
+| `consume_drink` | Record that a user consumed a drink (`drink`, optional `quantity`, optional `user` — defaults to the signed-in caller). Creates an `egress` transaction attributed to that user. |
+| `list_drinks` | List all drinks with current stock levels. |
+
+**Authentication** is OAuth 2.1 with Supabase Auth as the authorization server: the MCP client discovers it via the RFC 9728 metadata at `/.well-known/oauth-protected-resource`, registers itself dynamically, and sends the user through a browser sign-in + consent flow (`/oauth/consent`). Every request then carries the caller's own Supabase access token, so tools run under their identity and RLS.
+
+**One-time Supabase setup:**
+
+1. Enable the OAuth 2.1 server: Dashboard → Authentication → OAuth Server (or `[auth.oauth_server] enabled = true` in `config.toml`).
+2. Set the authorization URL path to `/oauth/consent` (the consent page ships with this app).
 
 ---
 
@@ -163,4 +179,3 @@ An AI assistant can record drink consumption through the bundled [MCP](https://m
 
 - [`PLAN.md`](./PLAN.md) — Full implementation plan with SQL schemas, component list, and phase breakdown.
 - [`DESIGN.md`](./DESIGN.md) — Design system: colors, typography, spacing, component patterns, accessibility rules.
-- [`mcp/README.md`](./mcp/README.md) — MCP server setup and tool reference.
