@@ -468,6 +468,19 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 
 ---
 
+### Phase 18: MCP Server for Drink Consumption
+
+**Goal:** Let AI assistants record drink consumption via the Model Context Protocol.
+
+- [x] **18.1** Add `mcp/server.ts` — stdio MCP server (`@modelcontextprotocol/sdk`) with `consume_drink` (user + drink + quantity → egress transaction) and `list_drinks` (products with current stock) tools
+- [x] **18.2** Authenticate via a dedicated bot account (`PARTYCOOLER_EMAIL` / `PARTYCOOLER_PASSWORD` env vars) — one Supabase session; `user_id` is attribution-only under RLS so the bot can record for any user
+- [x] **18.3** Add `mcp/README.md` — setup, client config example, and authentication model discussion
+- [x] **18.4** Add `npm run mcp` script (`tsx mcp/server.ts`)
+
+**Note:** User and drink names are matched case-insensitively in application code (exact first, then substring) against full table fetches — tables are small and this avoids `.or()` filter-injection quirks. If the server is ever exposed over HTTP, switch auth to OAuth 2.1 per the MCP spec instead of env credentials.
+
+---
+
 ## Directory Structure
 
 ```

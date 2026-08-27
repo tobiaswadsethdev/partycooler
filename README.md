@@ -96,6 +96,7 @@ partycooler/
 │   ├── actions/                  # Server Actions (products, transactions, dashboard)
 │   ├── actions/                  # Server Actions (products, transactions, dashboard, profile)
 │   └── types/                    # TypeScript interfaces
+├── mcp/                          # MCP server (consume_drink, list_drinks tools)
 ├── scripts/                      # Database schema (schema.sql)
 ├── proxy.ts                      # Route protection (Next.js 16 proxy convention)
 ├── PLAN.md                       # Implementation roadmap
@@ -123,6 +124,7 @@ partycooler/
 | 13 | Pant payment attribution for stock-in | ✅ Complete |
 | 14 | Homepage/Dashboard redesign | ✅ Complete |
 | 15 | My Transactions + Activity delete | ✅ Complete |
+| 16 | MCP server for drink consumption | ✅ Complete |
 
 ---
 
@@ -151,7 +153,14 @@ partycooler/
 
 ---
 
+## MCP Server
+
+An AI assistant can record drink consumption through the bundled [MCP](https://modelcontextprotocol.io) server (`consume_drink` and `list_drinks` tools). It runs over stdio via `npm run mcp` and signs in with a dedicated bot account. See [`mcp/README.md`](./mcp/README.md) for setup and the authentication model.
+
+---
+
 ## Documentation
 
 - [`PLAN.md`](./PLAN.md) — Full implementation plan with SQL schemas, component list, and phase breakdown.
 - [`DESIGN.md`](./DESIGN.md) — Design system: colors, typography, spacing, component patterns, accessibility rules.
+- [`mcp/README.md`](./mcp/README.md) — MCP server setup and tool reference.
