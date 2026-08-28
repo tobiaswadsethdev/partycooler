@@ -163,10 +163,12 @@ The app hosts a remote [MCP](https://modelcontextprotocol.io) server at `/api/mc
 
 | Tool | Description |
 |------|-------------|
-| `consume_drink` | Record that a user consumed a drink (`drink`, optional `quantity`, optional `user` — defaults to the signed-in caller). Creates an `egress` transaction attributed to that user. |
+| `consume_drink` | Record that the signed-in user consumed a drink (`drink`, optional `quantity`). Creates an `egress` transaction attributed to the authenticated caller. |
 | `list_drinks` | List all drinks with current stock levels. |
 
 **Authentication** is OAuth 2.1 with Supabase Auth as the authorization server: the MCP client discovers it via the RFC 9728 metadata at `/.well-known/oauth-protected-resource`, registers itself dynamically, and sends the user through a browser sign-in + consent flow (`/oauth/consent`). Every request then carries the caller's own Supabase access token, so tools run under their identity and RLS.
+
+**Scope** — tools act only for the authenticated caller. `consume_drink` takes the user id from the verified bearer token and never from tool arguments, so an MCP client cannot record consumption against someone else's account. The `transactions_insert_own` RLS policy enforces the same rule in the database (see `scripts/migrations/restrict_transaction_insert_to_self.sql` for existing deployments).
 
 **One-time Supabase setup:**
 

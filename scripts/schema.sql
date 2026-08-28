@@ -78,7 +78,8 @@ CREATE POLICY "products_delete_any" ON products FOR DELETE USING (auth.uid() IS 
 -- ---------------------------------------------------------------------------
 -- inventory_transactions
 -- user_id records who made the transaction (attribution only).
--- All authenticated users can read/write all transactions.
+-- All authenticated users can read all transactions, but may only insert or
+-- delete rows attributed to themselves.
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE inventory_transactions (
@@ -97,7 +98,7 @@ CREATE INDEX idx_transactions_product   ON inventory_transactions(product_id, tr
 
 ALTER TABLE inventory_transactions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "transactions_select_any" ON inventory_transactions FOR SELECT USING (auth.uid() IS NOT NULL);
-CREATE POLICY "transactions_insert_any" ON inventory_transactions FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "transactions_insert_own" ON inventory_transactions FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "transactions_delete_own" ON inventory_transactions FOR DELETE USING (auth.uid() = user_id);
 
 

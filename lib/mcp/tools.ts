@@ -6,16 +6,11 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
  * Tool registrations for the Partycooler MCP server.
  *
  * Every tool runs with the caller's own Supabase access token (issued via the
- * OAuth 2.1 flow), so RLS applies exactly as it does in the web app. user_id
- * on inventory_transactions is attribution-only, so consumption can be
- * recorded for any user; it defaults to the caller.
+ * OAuth 2.1 flow), so RLS applies exactly as it does in the web app.
+ * Transactions are always attributed to the authenticated caller — tools never
+ * accept a user to act on behalf of, so an MCP client cannot record
+ * consumption against somebody else's account.
  */
-
-interface ProfileRow {
-  id: string
-  email: string
-  name: string | null
-}
 
 interface ProductRow {
   id: string
@@ -23,18 +18,14 @@ interface ProductRow {
   category: string | null
 }
 
-type Named = { name: string | null; email?: string }
+type Named = { name: string | null }
 
 function matchByName<T extends Named>(rows: T[], query: string): { match?: T; candidates: T[] } {
   const q = query.trim().toLowerCase()
-  const exact = rows.filter(
-    (r) => r.name?.toLowerCase() === q || r.email?.toLowerCase() === q
-  )
+  const exact = rows.filter((r) => r.name?.toLowerCase() === q)
   if (exact.length === 1) return { match: exact[0], candidates: exact }
 
-  const partial = rows.filter(
-    (r) => r.name?.toLowerCase().includes(q) || r.email?.toLowerCase().includes(q)
-  )
+  const partial = rows.filter((r) => r.name?.toLowerCase().includes(q))
   if (partial.length === 1) return { match: partial[0], candidates: partial }
   return { candidates: exact.length > 0 ? exact : partial }
 }
@@ -59,52 +50,47 @@ function userClient(accessToken: string): SupabaseClient {
   )
 }
 
+/**
+ * The authenticated user's id, taken from the verified bearer token only —
+ * never from tool arguments.
+ */
+function callerUserId(authInfo?: { clientId?: string; extra?: Record<string, unknown> }): string | undefined {
+  const fromExtra = authInfo?.extra?.userId
+  if (typeof fromExtra === 'string' && fromExtra.length > 0) return fromExtra
+  return authInfo?.clientId
+}
+
 export function registerPartycoolerTools(server: McpServer) {
   server.registerTool(
     'consume_drink',
     {
       title: 'Consume a drink',
       description:
-        'Record that a user consumed a drink (creates an egress inventory transaction attributed to that user). ' +
-        'Defaults to the signed-in user; pass user to record for someone else. ' +
-        'User and drink are matched case-insensitively by name or email; use list_drinks to see what is in stock.',
+        'Record that the signed-in user consumed a drink (creates an egress inventory transaction ' +
+        'attributed to them). Consumption can only be recorded for the signed-in user — there is no ' +
+        'way to record it for someone else. The drink is matched case-insensitively by name; use ' +
+        'list_drinks to see what is in stock.',
       inputSchema: {
         drink: z.string().min(1).describe('Name of the drink (product) that was consumed'),
         quantity: z.number().int().min(1).default(1).describe('How many were consumed (default 1)'),
-        user: z
-          .string()
-          .min(1)
-          .optional()
-          .describe('Name or email of the user who consumed the drink (defaults to the signed-in user)'),
       },
     },
-    async ({ drink, quantity, user }, extra) => {
+    async ({ drink, quantity }, extra) => {
       const token = extra.authInfo?.token
       if (!token) return errorResult('Not authenticated')
+
+      const userId = callerUserId(extra.authInfo)
+      if (!userId) return errorResult('Could not resolve your user identity from the access token.')
+
       const supabase = userClient(token)
 
-      const { data: profiles, error: profilesError } = await supabase
+      const { data: consumer, error: profileError } = await supabase
         .from('profiles')
         .select('id, email, name')
-      if (profilesError) return errorResult(`Failed to load users: ${profilesError.message}`)
-
-      let consumer: ProfileRow | undefined
-      if (user) {
-        const userMatch = matchByName<ProfileRow>(profiles ?? [], user)
-        if (!userMatch.match) {
-          const options = (userMatch.candidates.length > 0 ? userMatch.candidates : profiles ?? [])
-            .map((p) => `${p.name ?? '(no name)'} <${p.email}>`)
-            .join(', ')
-          return errorResult(
-            userMatch.candidates.length > 1
-              ? `Ambiguous user "${user}". Matches: ${options}`
-              : `No user matching "${user}". Known users: ${options}`
-          )
-        }
-        consumer = userMatch.match
-      } else {
-        consumer = (profiles ?? []).find((p) => p.id === extra.authInfo?.clientId)
-        if (!consumer) return errorResult('Could not resolve your profile; pass user explicitly.')
+        .eq('id', userId)
+        .single()
+      if (profileError || !consumer) {
+        return errorResult(`Could not load your profile: ${profileError?.message ?? 'not found'}`)
       }
 
       const { data: products, error: productsError } = await supabase
@@ -125,7 +111,7 @@ export function registerPartycoolerTools(server: McpServer) {
       }
 
       const { error: insertError } = await supabase.from('inventory_transactions').insert({
-        user_id: consumer.id,
+        user_id: userId,
         product_id: drinkMatch.match.id,
         transaction_type: 'egress',
         quantity,

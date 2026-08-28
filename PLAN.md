@@ -472,7 +472,7 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 
 **Goal:** Let AI assistants record drink consumption via a central Model Context Protocol server hosted by the app itself — users connect by URL, nothing to install.
 
-- [x] **18.1** Add `lib/mcp/tools.ts` — `consume_drink` (drink + optional quantity/user → egress transaction; user defaults to the caller) and `list_drinks` (products with current stock); names matched case-insensitively (exact first, then substring) with available options returned on miss
+- [x] **18.1** Add `lib/mcp/tools.ts` — `consume_drink` (drink + optional quantity → egress transaction, always attributed to the authenticated caller) and `list_drinks` (products with current stock); drink names matched case-insensitively (exact first, then substring) with available options returned on miss
 - [x] **18.2** Add `app/api/mcp/[transport]/route.ts` — Streamable HTTP endpoint via `mcp-handler`, wrapped in `withMcpAuth`; bearer tokens are Supabase access tokens verified per request with `auth.getUser()`, and all tool DB access uses a client scoped to the caller's token (RLS as that user)
 - [x] **18.3** Add `app/.well-known/oauth-protected-resource/route.ts` — RFC 9728 metadata pointing MCP clients at Supabase Auth (`<supabase-url>/auth/v1`) as OAuth 2.1 authorization server
 - [x] **18.4** Add `app/oauth/consent/page.tsx` — consent page for Supabase's OAuth server (`getAuthorizationDetails` / `approveAuthorization` / `denyAuthorization`); redirects unauthenticated users to login and back
