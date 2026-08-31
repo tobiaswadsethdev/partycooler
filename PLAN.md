@@ -482,6 +482,18 @@ CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth
 
 ---
 
+### Phase 19: Merge Duplicate Products + Unique Product Names
+
+**Goal:** Collapse two `products` rows with the same name (two "Pepsi Max") into one that carries the combined stock and the full history, then stop duplicates from being created again.
+
+- [x] **19.1** Add `scripts/merge-duplicate-products.sql` — one-off data fix, run in the Supabase SQL Editor. A single `DO` block that keeps the oldest matching row, fills only its NULL `category`/`reorder_threshold` from the duplicates, re-points `inventory_transactions.product_id` and `activity_logs.details->>'product_id'` at it, then deletes the duplicates
+- [x] **19.2** Add `scripts/migrations/unique_product_name.sql` — guard that aborts with a readable message if duplicates remain, then `CREATE UNIQUE INDEX idx_products_name_unique ON products (lower(trim(name)))`
+- [x] **19.3** Update `lib/actions/products.ts` — map SQLSTATE `23505` to "A product with that name already exists" in `createProduct` and `updateProduct`, so the new index doesn't surface a raw constraint violation in the Add/Edit Product modal
+
+**Note:** Ordering is dictated by the triggers. `update_inventory_status()` recomputes only `COALESCE(NEW.product_id, OLD.product_id)`, so re-pointing transactions refreshes the keeper's `inventory_status` — giving it the combined stock — while leaving each duplicate's status row stale; those are cleaned up by `ON DELETE CASCADE`, which is why the product delete comes last. `log_inventory_transaction()` fires on INSERT only, so re-pointing creates no spurious log rows, but it also means the stale `details.product_id` must be rewritten explicitly (JSONB, no FK). The SQL Editor is required rather than a Node script: `inventory_transactions` and `activity_logs` have no UPDATE policy, so the re-pointing affects zero rows under a publishable-key session. The merge is not reversible — the file opens with a preview query to run first.
+
+---
+
 ## Directory Structure
 
 ```
