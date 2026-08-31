@@ -17,6 +17,13 @@ export type ActionResult =
   | { success: true; data?: Product }
   | { success: false; error: string }
 
+// Product names are unique on lower(trim(name)) — see
+// scripts/migrations/unique_product_name.sql. Surface that as plain language
+// rather than the raw constraint violation.
+function productErrorMessage(error: { code?: string; message: string }): string {
+  return error.code === '23505' ? 'A product with that name already exists' : error.message
+}
+
 export async function createProduct(values: ProductFormValues): Promise<ActionResult> {
   const parsed = productSchema.safeParse(values)
   if (!parsed.success) {
@@ -38,7 +45,7 @@ export async function createProduct(values: ProductFormValues): Promise<ActionRe
     .select()
     .single()
 
-  if (error) return { success: false, error: error.message }
+  if (error) return { success: false, error: productErrorMessage(error) }
 
   revalidatePath('/protected/products')
   return { success: true, data }
@@ -66,7 +73,7 @@ export async function updateProduct(id: string, values: ProductFormValues): Prom
     .select()
     .single()
 
-  if (error) return { success: false, error: error.message }
+  if (error) return { success: false, error: productErrorMessage(error) }
 
   revalidatePath('/protected/products')
   return { success: true, data }

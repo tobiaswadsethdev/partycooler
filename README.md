@@ -65,6 +65,19 @@ scripts/fix-inventory-trigger.sql
 
 This replaces the trigger function with a corrected version that uses schema-qualified table references.
 
+### A drink appears twice, with its stock split across both rows
+
+Two `products` rows with the same name (e.g. two "Pepsi Max") split the stock, the transaction history, and the activity log between them, and make the MCP `consume_drink` tool fail with `Ambiguous drink`.
+
+Merge them, then close the door behind you:
+
+```
+scripts/merge-duplicate-products.sql        # set v_target_name, then run
+scripts/migrations/unique_product_name.sql  # run once, afterwards
+```
+
+The merge re-points all transactions and activity logs at the oldest row, so it ends up with the combined stock, and deletes the duplicates. Run the preview query at the top of the file first — the merge is not reversible.
+
 ### 4. Start the dev server
 
 ```bash
@@ -99,7 +112,7 @@ partycooler/
 │   ├── actions/                  # Server Actions (products, transactions, dashboard, profile)
 │   ├── mcp/                      # MCP tool implementations (consume_drink, list_drinks)
 │   └── types/                    # TypeScript interfaces
-├── scripts/                      # Database schema (schema.sql)
+├── scripts/                      # Database schema (schema.sql), migrations, one-off data fixes
 ├── proxy.ts                      # Route protection (Next.js 16 proxy convention)
 ├── PLAN.md                       # Implementation roadmap
 └── DESIGN.md                     # Design system specification
@@ -127,6 +140,7 @@ partycooler/
 | 14 | Homepage/Dashboard redesign | ✅ Complete |
 | 15 | My Transactions + Activity delete | ✅ Complete |
 | 16 | MCP server for drink consumption | ✅ Complete |
+| 17 | Merge duplicate products + unique product names | ✅ Complete |
 
 ---
 
